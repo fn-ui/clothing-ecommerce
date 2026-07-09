@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Men — STUDIO_FIT</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header class="boutique-header">
+  <div class="brand-logo">
+    <a href="index.html" style="text-decoration:none;color:#000;">
+      STUDIO_FIT
+    </a>
+  </div>
+
+  <nav class="navigation-links">
+    <a href="men.html" class="active">Men</a>
+    <a href="women.html">Women</a>
+    <a href="kids.html">Kids</a>
+    <a href="lookbook.html">Lookbook</a>
+  </nav>
+
+  <div class="utility-actions">
+    <div class="search-wrapper">
+      <input type="text" placeholder="Search products..." id="searchInput">
+    </div>
+
+    <button
+      id="accountToggleBtn"
+      class="account-portal-link"
+      onclick="window.location.href='login.html'"
+    >
+      Sign In
+    </button>
+
+    <span class="cart-status" id="openCartBtn">
+      Bag (0)
+    </span>
+  </div>
+</header>
+
+<section class="collection-hero-meta">
+  <h1>Men's Collection</h1>
+
+  <p>
+    Elevated essentials designed with clean silhouettes,
+    premium textures, and timeless structure.
+  </p>
+</section>
+
+<main class="collection-workspace">
+
+  <div class="product-grid">
+
+    <!-- PRODUCT 1 -->
+    <a href="product.html?id=101" class="product-card-link">
+      <div class="product-card">
+
+        <div class="product-image-wrapper">
+          <img src="" alt="Relaxed Hoodie">
+
+          <button
+            class="quick-view-trigger-btn add-cart-btn"
+            data-product-id="1"
+            data-id="101"
+            data-title="Relaxed Hoodie"
+            data-price="95"
+            data-img=""
+          >
+            Add To Bag
+          </button>
+        </div>
+
+        <div class="product-details">
+          <h3 class="product-title">Relaxed Hoodie</h3>
+          <span class="product-price">$95.00</span>
+        </div>
+
+      </div>
+    </a>
+
+    <!-- PRODUCT 2 -->
+    <a href="product.html?id=102" class="product-card-link">
+      <div class="product-card">
+
+        <div class="product-image-wrapper">
+          <img src="" alt="Tailored Jacket">
+
+          <button
+            class="quick-view-trigger-btn add-cart-btn"
+            data-product-id="2"
+            data-id="102"
+            data-title="Tailored Jacket"
+            data-price="140"
+            data-img=""
+          >
+            Add To Bag
+          </button>
+        </div>
+
+        <div class="product-details">
+          <h3 class="product-title">Tailored Jacket</h3>
+          <span class="product-price">$140.00</span>
+        </div>
+
+      </div>
+    </a>
+
+    <!-- PRODUCT 3 -->
+    <a href="product.html?id=103" class="product-card-link">
+      <div class="product-card">
+
+        <div class="product-image-wrapper">
+          <img src="" alt="Premium Knit">
+
+          <button
+            class="quick-view-trigger-btn add-cart-btn"
+            data-product-id="3"
+            data-id="103"
+            data-title="Premium Knit"
+            data-price="110"
+            data-img=""
+          >
+            Add To Bag
+          </button>
+        </div>
+
+        <div class="product-details">
+          <h3 class="product-title">Premium Knit</h3>
+          <span class="product-price">$110.00</span>
+        </div>
+
+      </div>
+    </a>
+
+  </div>
+
+</main>
+
+<div id="toastNotification" class="toast-notification"></div>
+
+
+<div class="cart-drawer-overlay" id="cartDrawerOverlay">
+  <div class="cart-drawer-panel">
+
+    <div class="drawer-header">
+      <h2>
+        Your Shopping Bag
+        (<span id="cartCount">0</span>)
+      </h2>
+
+      <div class="drawer-header-actions">
+        <button class="clear-cart-link-btn" id="clearCartBtn">
+          Clear All
+        </button>
+
+        <button class="close-drawer-btn" id="closeCartBtn">
+          &times;
+        </button>
+      </div>
+    </div>
+
+    <div class="drawer-items-list"></div>
+
+    <div class="drawer-summary-footer">
+
+      <div class="summary-subtotal-row">
+        <span>Subtotal</span>
+        <span class="subtotal-amount">$0.00</span>
+      </div>
+
+      <button
+        class="btn-checkout-solid"
+        onclick="window.location.href='checkout.html'"
+      >
+        Proceed To Checkout
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="js/cart.js"></script>
+<script src="js/quickview.js"></script>
+
+<script>
+
+document.querySelectorAll('.add-cart-btn').forEach(button => {
+  button.addEventListener('click', (event) => {
+    event.preventDefault();
+    addItemToCart(
+      button.dataset.id,
+      button.dataset.title,
+      button.dataset.price,
+      button.dataset.img
+    );
+  });
+});
+
+</script>
+
+</body>
+</html>

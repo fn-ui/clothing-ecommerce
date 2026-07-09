@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account — STUDIO_FIT</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header class="checkout-minimal-header">
+    <div class="brand-logo"><a href="index.html">STUDIO_FIT</a></div>
+    <div class="secure-badge">✨ Create Your Account</div>
+  </header>
+
+  <main class="product-detail-container" style="padding-top: 40px; padding-bottom: 80px;">
+    <section class="checkout-form-section" style="background: transparent; padding: 0;">
+      <div class="panel-header-block" style="margin-bottom: 24px;">
+        <h2 style="font-size: 2rem;">Join the Studio</h2>
+        <p>Get early access to seasonal drops, lookbooks, and design releases.</p>
+      </div>
+
+      <form class="profile-update-form-block" style="max-width: 560px;" onsubmit="event.preventDefault(); alert('Account Created Successfully!'); window.location.href='account.html';">
+        <div class="form-input-row-grid">
+          <div class="input-field-wrapper">
+            <label>First Name</label>
+            <input type="text" placeholder="First name" required autocomplete="given-name">
+          </div>
+          <div class="input-field-wrapper">
+            <label>Last Name</label>
+            <input type="text" placeholder="Last name" required autocomplete="family-name">
+          </div>
+        </div>
+
+        <div class="input-field-wrapper">
+          <label>Email Address</label>
+          <input type="email" placeholder="Email address" required autocomplete="email">
+        </div>
+
+        <div class="input-field-wrapper">
+          <label>Password (Min. 8 characters)</label>
+          <input type="password" placeholder="Password" required minlength="8" autocomplete="new-password">
+        </div>
+
+        <button type="submit" class="btn-save-profile">Create Account</button>
+
+        <div style="margin-top: 14px; font-size: 0.9rem; color: #767677;">
+          Already have an account?
+          <a href="login.html" style="color:#000; font-weight:600; text-decoration: none; border-bottom: 1px solid #000; padding-bottom: 2px;">Sign in</a>
+        </div>
+      </form>
+    </section>
+
+    <aside class="checkout-summary-section" style="border-left: 1px solid #e5e5ea; background-color:#ffffff; padding: 40px 10% 40px 10%;">
+      <h3 style="font-size: 1.2rem; font-weight: 500; margin-bottom: 16px; color:#000;">Member benefits</h3>
+      <div style="display:flex; flex-direction:column; gap: 12px;">
+        <div style="color:#444446; font-size:0.95rem; line-height:1.6;">• Early access to new seasonal collections.</div>
+        <div style="color:#444446; font-size:0.95rem; line-height:1.6;">• Complimentary shipping offers.</div>
+        <div style="color:#444446; font-size:0.95rem; line-height:1.6;">• Order tracking and account tools.</div>
+      </div>
+
+      <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid #e5e5ea;">
+        <button class="btn-outline-action" onclick="window.location.href='login.html'" style="width:100%;">Back to Sign In</button>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Cart drawer shared elements (so Bag counter continues working) -->
+  <div class="cart-drawer-overlay" id="cartDrawerOverlay">
+    <div class="cart-drawer-panel">
+      <div class="drawer-header">
+        <h2>Your Shopping Bag (<span id="cartCount">0</span>)</h2>
+        <div class="drawer-header-actions">
+          <button class="clear-cart-link-btn" id="clearCartBtn">Clear All</button>
+          <button class="close-drawer-btn" id="closeCartBtn">&times;</button>
+        </div>
+      </div>
+      <div class="drawer-items-list"></div>
+      <div class="drawer-summary-footer">
+        <div class="summary-subtotal-row">
+          <span>Subtotal</span>
+          <span class="subtotal-amount">$0.00</span>
+        </div>
+        <p class="summary-shipping-note">Shipping, taxes, and discounts calculated at checkout.</p>
+        <button class="btn-checkout-solid" onclick="window.location.href='checkout.html'">Proceed To Checkout</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="cart.js"></script>
+</body>
+</html>
+

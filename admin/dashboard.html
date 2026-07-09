@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>STUDIO_FIT Admin</title>
+
+    <link rel="stylesheet" href="css/admin.css">
+
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        rel="stylesheet"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="js/supabase.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/router.js" defer></script>
+    <script src="js/dashboard.js" defer></script>
+    <script src="js/product.js" defer></script>
+    <script src="js/categories.js" defer></script>
+    <script src="js/newsletter.js" defer></script>
+    <script src="js/settings.js" defer></script>
+
+    <script src="js/utils.js"></script>
+
+</head>
+
+<body>
+
+<div class="admin-layout">
+
+    <!-- Sidebar -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-header">
+
+            STUDIO_FIT
+
+        </div>
+
+        <nav class="sidebar-menu">
+
+            <a href="#" data-page="dashboard" class="active">
+
+                <i class="fas fa-chart-line"></i>
+
+                Dashboard
+
+            </a>
+
+            <a href="#" data-page="products">
+
+                <i class="fas fa-box"></i>
+
+                Products
+
+            </a>
+
+            <a href="#" data-page="categories">
+
+                <i class="fas fa-tags"></i>
+
+                Categories
+
+            </a>
+
+            <a href="#" data-page="newsletter">
+
+                <i class="fas fa-envelope"></i>
+
+                Newsletter
+
+            </a>
+
+            <a href="#" data-page="settings">
+
+                <i class="fas fa-gear"></i>
+
+                Settings
+
+            </a>
+
+            <a href="#" onclick="logout()">
+
+                <i class="fas fa-right-from-bracket"></i>
+
+                Logout
+
+            </a>
+
+        </nav>
+
+    </aside>
+
+    <!-- Main -->
+
+    <main class="main">
+
+        <div class="topbar">
+
+            <input
+                class="search"
+                type="search"
+                placeholder="Search products, categories..."
+            >
+
+            <div class="topbar-right">
+
+                <button class="icon-btn">
+
+                    <i class="fas fa-bell"></i>
+
+                </button>
+
+                <button class="icon-btn">
+
+                    <i class="fas fa-store"></i>
+
+                </button>
+
+                <div class="avatar" id="adminAvatar">
+
+                    A
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Dynamic Pages -->
+
+        <div id="pageContent">
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+
+</html>

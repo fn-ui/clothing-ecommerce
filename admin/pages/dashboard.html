@@ -1,0 +1,356 @@
+<div class="dashboard-header">
+
+    <div>
+
+        <h1 class="page-title">
+            Welcome back,
+            <span id="adminName">Admin</span> 👋
+        </h1>
+
+        <p class="page-subtitle">
+            Here's what's happening in your store today.
+        </p>
+
+    </div>
+
+    <button class="primary-btn" id="newProductBtn">
+
+        <i class="fas fa-plus"></i>
+
+        Add Product
+
+    </button>
+
+</div>
+
+<!-- =======================
+STATS
+======================= -->
+
+<section class="stats-grid">
+
+    <div class="stat-card">
+
+        <div class="stat-icon emerald">
+
+            <i class="fas fa-box"></i>
+
+        </div>
+
+        <div class="stat-content">
+
+            <span>Total Products</span>
+
+            <h2 id="productCount">0</h2>
+
+            <small id="productGrowth">
+                Loading...
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="stat-card">
+
+        <div class="stat-icon blue">
+
+            <i class="fas fa-tags"></i>
+
+        </div>
+
+        <div class="stat-content">
+
+            <span>Categories</span>
+
+            <h2 id="categoryCount">0</h2>
+
+            <small>
+                Product collections
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="stat-card">
+
+        <div class="stat-icon orange">
+
+            <i class="fas fa-image"></i>
+
+        </div>
+
+        <div class="stat-content">
+
+            <span>Images</span>
+
+            <h2 id="imageCount">0</h2>
+
+            <small>
+                Uploaded gallery
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="stat-card">
+
+        <div class="stat-icon purple">
+
+            <i class="fas fa-users"></i>
+
+        </div>
+
+        <div class="stat-content">
+
+            <span>Customers</span>
+
+            <h2 id="customerCount">0</h2>
+
+            <small>
+                Registered users
+            </small>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================
+MAIN GRID
+======================= -->
+
+<section class="dashboard-layout">
+
+    <!-- LEFT -->
+
+    <div class="dashboard-left">
+
+        <!-- Analytics -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <h3>
+
+                    Store Analytics
+
+                </h3>
+
+                <select id="chartFilter">
+
+                    <option>Last 7 Days</option>
+
+                    <option>Last 30 Days</option>
+
+                    <option>This Year</option>
+
+                </select>
+
+            </div>
+
+            <div class="chart-wrapper">
+
+                <canvas id="dashboardChart"></canvas>
+
+            </div>
+
+        </div>
+
+        <!-- Recent Products -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <h3>
+
+                    Recently Added Products
+
+                </h3>
+
+                <a href="#" data-page="products">
+
+                    View All →
+
+                </a>
+
+            </div>
+
+            <table class="admin-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Product</th>
+
+                        <th>Category</th>
+
+                        <th>Price</th>
+
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="recentProducts">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+
+    <aside class="dashboard-right">
+
+        <!-- Inventory -->
+
+        <div class="panel">
+
+            <h3>
+
+                Inventory Status
+
+            </h3>
+
+            <div class="inventory-list">
+
+                <div class="inventory-item">
+
+                    <span>Active Products</span>
+
+                    <strong id="activeProducts">
+
+                        0
+
+                    </strong>
+
+                </div>
+
+                <div class="inventory-item">
+
+                    <span>Out of Stock</span>
+
+                    <strong id="outOfStock">
+
+                        0
+
+                    </strong>
+
+                </div>
+
+                <div class="inventory-item">
+
+                    <span>Featured</span>
+
+                    <strong id="featuredProducts">
+
+                        0
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Activity -->
+
+        <div class="panel">
+
+            <h3>
+
+                Recent Activity
+
+            </h3>
+
+            <div id="activityFeed" class="activity-feed">
+
+                <div class="activity-item">
+
+                    <div class="activity-dot"></div>
+
+                    <div>
+
+                        <strong>
+
+                            Welcome to STUDIO_FIT Admin
+
+                        </strong>
+
+                        <small>
+
+                            Dashboard initialized successfully.
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Quick Actions -->
+
+        <div class="panel">
+
+            <h3>
+
+                Quick Actions
+
+            </h3>
+
+            <div class="quick-grid">
+
+                <button id="quickAddProduct">
+
+                    <i class="fas fa-plus"></i>
+
+                    Product
+
+                </button>
+
+                <button id="quickCategory">
+
+                    <i class="fas fa-tags"></i>
+
+                    Category
+
+                </button>
+
+                <button id="quickProducts">
+
+                    <i class="fas fa-box"></i>
+
+                    Products
+
+                </button>
+
+                <button id="quickSettings">
+
+                    <i class="fas fa-gear"></i>
+
+                    Settings
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+</section>

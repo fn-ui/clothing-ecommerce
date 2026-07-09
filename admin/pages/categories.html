@@ -1,0 +1,124 @@
+<div class="page-header">
+
+    <div>
+
+        <h1 class="page-title">Categories</h1>
+
+        <p class="page-subtitle">
+
+            Manage product categories.
+
+        </p>
+
+    </div>
+
+    <button
+        class="btn btn-primary"
+        id="newCategoryBtn"
+    >
+
+        <i class="fas fa-plus"></i>
+
+        Add Category
+
+    </button>
+
+</div>
+
+<div class="table-container">
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Name</th>
+
+                <th>Slug</th>
+
+                <th>Created</th>
+
+                <th>Actions</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="categoriesTable">
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<!-- Modal -->
+
+<div id="categoryModal" class="modal">
+
+    <div class="modal-content">
+
+        <h2 id="categoryModalTitle">
+
+            Add Category
+
+        </h2>
+
+        <form id="categoryForm">
+
+            <input
+                type="hidden"
+                id="categoryId"
+            >
+
+            <div class="form-control">
+
+                <label>Name</label>
+
+                <input
+                    id="categoryName"
+                    required
+                >
+
+            </div>
+
+            <div class="form-control">
+
+                <label>Slug</label>
+
+                <input
+                    id="categorySlug"
+                    readonly
+                >
+
+            </div>
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    onclick="closeCategoryModal()"
+                >
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+
+                    Save
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>

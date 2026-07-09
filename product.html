@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oversized Knit Vest — STUDIO_FIT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Reusable Boutique Header Bar -->
+  <header class="boutique-header">
+    <div class="brand-logo"><a href="index.html" style="text-decoration:none; color:#000;">STUDIO_FIT</a></div>
+    <nav class="navigation-links">
+      <a href="collection.html">New Arrivals</a>
+      <a href="men.html">Men</a>
+     <a href="women.html">Women</a>
+     <a href="kids.html">Kids</a>
+      <a href="lookbook.html">Lookbook</a>
+    </nav>
+    <div class="utility-actions">
+      <div class="search-wrapper">
+        <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off">
+      </div>
+      <button id="accountToggleBtn" class="account-portal-link">Sign In</button>
+      <span class="cart-status" id="openCartBtn">Bag (0)</span>
+    </div>
+  </header>
+
+  <!-- Split Product Detail Component Workspace -->
+  <main class="product-detail-container">
+    
+    <!-- Left Column: Large Editorial Media Gallery Grid -->
+    <div class="product-gallery">
+      <div class="gallery-image-frame">
+        <img src="https://unsplash.com" alt="Oversized Wool Vest Front View">
+      </div>
+      <div class="gallery-image-frame">
+        <img src="https://unsplash.com" alt="Oversized Wool Vest Styling Angle">
+      </div>
+    </div>
+
+    <!-- Right Column: Context Information & Purchasing Mechanisms -->
+    <div class="product-purchase-panel">
+      <div class="product-meta-header">
+        <span class="meta-kicker">New Drop / Limited Run</span>
+        <h1 class="detail-title">Oversized Knit Vest</h1>
+        <span class="detail-price">$88.00</span>
+      </div>
+
+      <p class="detail-description">
+        Crafted from a premium heavy-blend ethical wool composite, this oversized knit vest features dropped shoulder frames, deep ribbed trim detailing, and a clean, relaxed silhouette tailored to layer effortlessly over structural shirts or heavy fleeces.
+      </p>
+
+      <!-- Interactive Swatch Selector Wrapper -->
+      <div class="selector-block">
+        <span class="selector-label">Color: <span class="selected-value">Carbon Grey</span></span>
+        <div class="color-swatch-group">
+          <button class="swatch-btn active" style="background-color: #5A5D64;" title="Carbon Grey"></button>
+          <button class="swatch-btn" style="background-color: #1A1C1E;" title="Midnight Black"></button>
+          <button class="swatch-btn" style="background-color: #E3DEC3;" title="Oatmeal Cream"></button>
+        </div>
+      </div>
+
+      <!-- Size Selection Matrix -->
+      <div class="selector-block">
+        <div class="size-header-row">
+          <span class="selector-label">Select Size</span>
+          <button class="size-guide-toggle">Sizing Chart</button>
+        </div>
+        <div class="size-buttons-grid">
+          <button class="size-box-btn disabled">XS</button>
+          <button class="size-box-btn">S</button>
+          <button class="size-box-btn active">M</button>
+          <button class="size-box-btn">L</button>
+          <button class="size-box-btn">XL</button>
+        </div>
+      </div>
+
+      <!-- Add To Basket Action Matrix -->
+<div class="purchase-actions-row">
+  <button 
+    class="btn-add-to-bag"
+    id="addToBagBtn"
+
+    data-product-id="1"
+    data-product-title="Oversized Knit Vest"
+    data-product-price="88.00"
+    data-product-img="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800"
+  >
+    Add To Shopping Bag
+  </button>
+</div>
+
+      <!-- Accordion Product Specifics Utilities -->
+      <div class="product-accordion">
+        
+        <!-- Accordion Item 1 -->
+        <div class="accordion-item">
+          <div class="accordion-trigger">
+            <span>Composition & Care</span>
+            <span class="accordion-icon">+</span>
+          </div>
+          <div class="accordion-content">
+            <p>70% Responsible Sourced Wool, 30% Organic Cotton. Dry clean only or gentle hand wash cold with luxury wool detergent. Reshape while damp and dry flat away from direct sunlight.</p>
+          </div>
+        </div>
+
+        <!-- Accordion Item 2 -->
+        <div class="accordion-item">
+          <div class="accordion-trigger">
+            <span>Sustainability Standard</span>
+            <span class="accordion-icon">+</span>
+          </div>
+          <div class="accordion-content">
+            <p>Produced using completely ethical manufacturing processes certified by the Global Organic Textile Standard (GOTS). Fabricated in low-waste, renewable energy-powered facilities with safe, fair labor practices.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modern Slide-Out Cart Drawer Panel -->
+  <div class="cart-drawer-overlay" id="cartDrawerOverlay">
+    <div class="cart-drawer-panel">
+      <div class="drawer-header">
+        <h2>Your Shopping Bag</h2>
+        <div class="drawer-header-actions">
+          <button class="clear-cart-link-btn" id="clearCartBtn">Clear All</button>
+          <button class="close-drawer-btn" id="closeCartBtn">&times;</button>
+        </div>
+      </div>
+
+      <!-- cart.js will fully render items here -->
+      <div class="drawer-items-list"></div>
+
+      <div class="drawer-summary-footer">
+        <div class="summary-subtotal-row">
+          <span>Subtotal</span>
+          <span class="subtotal-amount">$0.00</span>
+        </div>
+        <p class="summary-shipping-note">Shipping, taxes, and discounts calculated at checkout.</p>
+        <button class="btn-checkout-solid" onclick="window.location.href='checkout.html'">Proceed To Checkout</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Load Global Cart Engine First -->
+  <script src="js/cart.js"></script>
+  <script src="js/product-page.js"></script>
+
+  <!-- Page Interactivity Scripts -->
+  <script>
+
+
+    // 1. Color Swatch Interactivity
+    const swatchButtons = document.querySelectorAll('.color-swatch-group .swatch-btn');
+    const selectedColorText = document.querySelector('.selector-label .selected-value');
+
+    swatchButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        swatchButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        selectedColorText.textContent = button.getAttribute('title');
+      });
+    });
+
+    // 2. Size Button Matrix Interactivity
+    const sizeButtons = document.querySelectorAll('.size-buttons-grid .size-box-btn');
+
+    sizeButtons.forEach(button => {
+      if (!button.classList.contains('disabled')) {
+        button.addEventListener('click', () => {
+          sizeButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+        });
+      }
+    });
+
+    // 3. Add To Shopping Bag System
+const addToBagBtn = document.getElementById('addToBagBtn');
+
+if (addToBagBtn) {
+  addToBagBtn.addEventListener('click', () => {
+
+    const pid = String(addToBagBtn.dataset.productId);
+    const pTitle = addToBagBtn.dataset.productTitle;
+    const pPrice = addToBagBtn.dataset.productPrice;
+    const pImg = addToBagBtn.dataset.productImg;
+
+    addItemToCart(pid, pTitle, pPrice, pImg);
+
+    // Update UI immediately
+    syncCartUI();
+
+    // Visual Feedback
+    addToBagBtn.textContent = 'Added To Bag ✓';
+    addToBagBtn.style.opacity = '0.7';
+
+    setTimeout(() => {
+      addToBagBtn.textContent = 'Add To Shopping Bag';
+      addToBagBtn.style.opacity = '1';
+    }, 1200);
+  });
+}
+
+    // Cart drawer open/close, quantity changes, and totals are handled by cart.js
+  </script>
+
+<div id="toastNotification" class="toast-notification">
+  Item added to bag ✓
+</div>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<div class="page-header">
+
+    <div>
+
+        <h1 class="page-title">Products</h1>
+
+        <p class="page-subtitle">
+            Manage your store products
+        </p>
+
+    </div>
+
+    <button
+        class="btn btn-primary"
+        id="addProductBtn"
+    >
+
+        <i class="fas fa-plus"></i>
+
+        Add Product
+
+    </button>
+
+</div>
+
+<div class="table-container">
+
+    <div class="table-toolbar">
+
+        <input
+            type="search"
+            id="productSearch"
+            class="search-input"
+            placeholder="Search products..."
+        >
+
+        <select id="categoryFilter">
+
+            <option value="">All Categories</option>
+
+        </select>
+
+    </div>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Image</th>
+
+                <th>Name</th>
+
+                <th>Category</th>
+
+                <th>Price</th>
+
+                <th>Stock</th>
+
+                <th>Featured</th>
+
+                <th>Status</th>
+
+                <th>Actions</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="productsTable">
+
+        </tbody>
+
+    </table>
+
+    <div id="pagination" class="pagination"></div>
+
+</div>

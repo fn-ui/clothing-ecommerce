@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Clothing — STUDIO_FIT</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Reusable Boutique Header Bar -->
+  <header class="boutique-header">
+    <div class="brand-logo"><a href="index.html" style="text-decoration:none; color:#000;">STUDIO_FIT</a></div>
+    <nav class="navigation-links">
+      <a href="collection.html" class="active">New Arrivals</a>
+      <a href="men.html">Men</a>
+     <a href="women.html">Women</a>
+     <a href="kids.html">Kids</a>
+      <a href="lookbook.html">Lookbook</a>
+    </nav>
+    <div class="utility-actions">
+      <div class="search-wrapper">
+        <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off">
+      </div>
+      <button id="accountToggleBtn" class="account-portal-link" onclick="window.location.href='account.html'">Sign In</button>
+      <span class="cart-status" id="openCartBtn">Bag (0)</span>
+    </div>
+  </header>
+
+  <!-- Collection Workspace View -->
+  <main class="collection-workspace">
+    <div class="collection-hero-meta">
+      <h1>All Clothing</h1>
+      <p>Discover our core wardrobe system. Minimal silhouettes crafted from premium materials designed to move with you.</p>
+    </div>
+
+    <!-- Minimalist Filter & Sort Utilities Control Bar -->
+    <div class="collection-toolbar-container">
+      <div class="collection-toolbar">
+        <div class="filter-controls-group">
+          <button class="toolbar-btn" id="filterToggleBtn">Filter By Category <span class="arrow-indicator">&darr;</span></button>
+          <button class="toolbar-btn">Material &darr;</button>
+          <span class="product-inventory-count">8 Items</span>
+        </div>
+        <div class="sort-controls-group">
+          <select class="sort-dropdown" id="sortSelect">
+            <option value="featured">Sort By: Featured</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Expandable Sub-Filter Drawer -->
+      <div class="filter-drawer" id="filterDrawer">
+        <div class="filter-drawer-inner">
+          <div class="filter-group-column">
+            <h5>Apparel Type</h5>
+            <label class="filter-checkbox-label">
+              <input type="checkbox" name="category" value="outerwear"> Outerwear & Coats
+            </label>
+            <label class="filter-checkbox-label">
+              <input type="checkbox" name="category" value="tops"> Tops & Knitwear
+            </label>
+            <label class="filter-checkbox-label">
+              <input type="checkbox" name="category" value="bottoms"> Trousers & Denim
+            </label>
+          </div>
+          <div class="filter-group-column">
+            <h5>Sizing Availability</h5>
+            <label class="filter-checkbox-label"><input type="checkbox" name="size" value="s"> Small</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="size" value="m"> Medium</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="size" value="l"> Large</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expanded Inventory Collection Grid Layout -->
+    <div class="product-grid" id="productGrid">
+
+      <!-- Item Card 1 -->
+      <a href="product.html?id=1" class="product-card-link" data-product-id="1" data-category="tops" data-price="88.00">
+        <div class="product-card">
+          <div class="product-image-wrapper">
+            <img src="https://unsplash.com" alt="Oversized Wool Vest">
+            <span class="product-tag">New Drop</span>
+            <button class="quick-view-trigger-btn" data-product-id="1">Quick View</button>
+          </div>
+          <div class="product-details">
+            <h3 class="product-title">Oversized Knit Vest</h3>
+            <span class="product-price">$88.00</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Item Card 2 -->
+      <a href="product.html?id=2" class="product-card-link" data-category="bottoms" data-price="110.00">
+        <div class="product-card">
+          <div class="product-image-wrapper">
+            <img src="https://unsplash.com" alt="Tailored Trouser">
+            <button class="quick-view-trigger-btn" data-product-id="2">Quick View</button>
+          </div>
+          <div class="product-details">
+            <h3 class="product-title">Straight-Leg Trouser</h3>
+            <span class="product-price">$110.00</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Item Card 3 -->
+      <a href="product.html?id=3" class="product-card-link" data-category="tops" data-price="95.00">
+        <div class="product-card">
+          <div class="product-image-wrapper">
+            <img src="https://unsplash.com" alt="Classic Heavy Hoodie">
+            <button class="quick-view-trigger-btn" data-product-id="3">Quick View</button>
+          </div>
+          <div class="product-details">
+            <h3 class="product-title">Classic Heavy Hoodie</h3>
+            <span class="product-price">$95.00</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Item Card 4 -->
+      <a href="product.html?id=4" class="product-card-link" data-category="outerwear" data-price="145.00">
+        <div class="product-card">
+          <div class="product-image-wrapper">
+            <img src="https://unsplash.com" alt="Relaxed Linen Trench">
+            <span class="product-tag sale-tag">Sale</span>
+            <button class="quick-view-trigger-btn" data-product-id="4">Quick View</button>
+          </div>
+          <div class="product-details">
+            <h3 class="product-title">Relaxed Linen Trench</h3>
+            <span class="product-price">$145.00</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Item Card 5 -->
+      <a href="product.html?id=5" class="product-card-link" data-category="outerwear" data-price="210.00">
+        <div class="product-card">
+          <div class="product-image-wrapper">
+            <img src="https://unsplash.com" alt="Tailored Blazer">
+            <button class="quick-view-trigger-btn" data-product-id="5">Quick View</button>
+          </div>
+          <div class="product-details">
+            <h3 class="product-title">Tailored Wool Blazer</h3>
+            <span class="product-price">$210.00</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Item Card 6 -->
+      <a href="product.html?id=6" class="product-card-link" data-category="tops" data-price="125.00">
+        <div class="product-card">
+          <div class="product-image-wrapper">
+            <img src="https://unsplash.com" alt="Silk Button Up">
+            <button class="quick-view-trigger-btn" data-product-id="6">Quick View</button>
+          </div>
+          <div class="product-details">
+            <h3 class="product-title">Relaxed Silk Shirt</h3>
+            <span class="product-price">$125.00</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Item Card 7 -->
+      <a href="product.html?id=7" class="product-card-link" data-category="tops" data-price="115.00">
+        <div class="product-card">
+          <div class="product-image-wrapper">
+            <img src="https://unsplash.com" alt="Knit Mockneck Sweater">
+            <button class="quick-view-trigger-btn" data-product-id="7">Quick View</button>
+          </div>
+          <div class="product-details">
+            <h3 class="product-title">Premium Mockneck Knit</h3>
+            <span class="product-price">$115.00</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Item Card 8 -->
+      <a href="product.html?id=8" class="product-card-link" data-category="bottoms" data-price="130.00">
+        <div class="product-card">
+          <div class="product-image-wrapper">
+            <img src="https://unsplash.com" alt="Raw Denim Jeans">
+            <button class="quick-view-trigger-btn" data-product-id="8">Quick View</button>
+          </div>
+          <div class="product-details">
+            <h3 class="product-title">Straight Raw Denim</h3>
+            <span class="product-price">$130.00</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
+  </main>
+
+ 
+
+  <!-- Modern Slide-Out Cart Drawer Panel -->
+  <div class="cart-drawer-overlay" id="cartDrawerOverlay">
+    <div class="cart-drawer-panel">
+      <div class="drawer-header">
+        <h2>Your Shopping Bag</h2>
+        <div class="drawer-header-actions">
+          <button class="clear-cart-link-btn" id="clearCartBtn">Clear All</button>
+          <button class="close-drawer-btn" id="closeCartBtn">&times;</button>
+        </div>
+      </div>
+
+      <div class="drawer-items-list"></div>
+
+      <div class="drawer-summary-footer">
+        <div class="summary-subtotal-row">
+          <span>Subtotal</span>
+          <span class="subtotal-amount">$0.00</span>
+        </div>
+        <p class="summary-shipping-note">Shipping, taxes, and discounts calculated at checkout.</p>
+        <button class="btn-checkout-solid" onclick="window.location.href='checkout.html'">Proceed To Checkout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Global Cart Engine First -->
+  <script src="js/cart.js"></script>
+  
+
+  <!-- Unified Catalog Management Script Panel -->
+  <script>
+
+    // 1. Filter Slider Trigger Drawer
+    const filterToggleBtn = document.getElementById('filterToggleBtn');
+    const filterDrawer = document.getElementById('filterDrawer');
+
+    if (filterToggleBtn && filterDrawer) {
+      filterToggleBtn.addEventListener('click', () => {
+        filterDrawer.classList.toggle('is-open');
+        filterToggleBtn.classList.toggle('active');
+      });
+    }
+
+    // 2. Real-Time Product Grid Filtering & Text Search Logic
+    const categoryCheckboxes = document.querySelectorAll('input[name="category"]');
+    const productCards = document.querySelectorAll('.product-grid .product-card-link');
+    const inventoryCountText = document.querySelector('.product-inventory-count');
+    const searchInput = document.getElementById('searchInput');
+
+    function applyFiltersAndSearch() {
+      const activeFilters = Array.from(categoryCheckboxes).filter(i => i.checked).map(i => i.value);
+      const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      let visibleCount = 0;
+
+      productCards.forEach(card => {
+        const cardCategory = card.getAttribute('data-category');
+        const productTitleText = card.querySelector('.product-title').textContent.toLowerCase();
+
+        const matchesCategory = activeFilters.length === 0 || activeFilters.includes(cardCategory);
+        const matchesSearch = productTitleText.includes(searchTerm);
+
+        if (matchesCategory && matchesSearch) {
+          card.classList.remove('is-hidden');
+          card.style.display = 'block';
+          visibleCount++;
+        } else {
+          card.classList.add('is-hidden');
+          card.style.display = 'none';
+        }
+      });
+
+      if (inventoryCountText) {
+        inventoryCountText.textContent = `${visibleCount} Items`;
+      }
+    }
+
+    categoryCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', applyFiltersAndSearch);
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', applyFiltersAndSearch);
+    }
+
+    // 3. Real-Time Product Grid Sorting System Logic
+    const sortSelect = document.getElementById('sortSelect');
+    const productGrid = document.getElementById('productGrid');
+
+    if (sortSelect && productGrid) {
+      sortSelect.addEventListener('change', () => {
+        const selectedValue = sortSelect.value;
+        const cardsArray = Array.from(productCards);
+
+        cardsArray.sort((cardA, cardB) => {
+          const priceA = parseFloat(cardA.getAttribute('data-price'));
+          const priceB = parseFloat(cardB.getAttribute('data-price'));
+
+          if (selectedValue === 'price-low') return priceA - priceB;
+          if (selectedValue === 'price-high') return priceB - priceA;
+          return 0;
+        });
+
+        productGrid.innerHTML = '';
+        cardsArray.forEach(card => productGrid.appendChild(card));
+      });
+    }
+
+    // 4. Drawer Toggle Panel Management
+    const openCartBtn = document.getElementById('openCartBtn');
+    const closeCartBtn = document.getElementById('closeCartBtn');
+    const cartDrawerOverlay = document.getElementById('cartDrawerOverlay');
+
+    if (openCartBtn && cartDrawerOverlay) {
+      openCartBtn.addEventListener('click', () => {
+        cartDrawerOverlay.classList.add('is-active');
+        document.body.style.overflow = 'hidden';
+      });
+    }
+
+    if (closeCartBtn && cartDrawerOverlay) {
+      const closeCartDrawer = () => {
+        cartDrawerOverlay.classList.remove('is-active');
+        document.body.style.overflow = '';
+      };
+
+      closeCartBtn.addEventListener('click', closeCartDrawer);
+      cartDrawerOverlay.addEventListener('click', (event) => {
+        if (event.target === cartDrawerOverlay) {
+          closeCartDrawer();
+        }
+      });
+    }
+
+
+  // ===============================
+  // QUICK VIEW PRODUCT DATA
+  // ===============================
+
+  const quickViewButtons =
+    document.querySelectorAll('.quick-view-trigger-btn');
+
+  const quickviewModalOverlay =
+    document.getElementById('quickviewModalOverlay');
+
+  const closeQuickviewBtn =
+    document.getElementById('closeQuickviewBtn');
+
+  const modalProductImage =
+    document.getElementById('modalProductImage');
+
+  const modalProductTitle =
+    document.getElementById('modalProductTitle');
+
+  const modalProductPrice =
+    document.getElementById('modalProductPrice');
+
+  const modalAddToBagBtn =
+    document.getElementById('modalAddToBagBtn');
+
+  const modalViewDetailsLink =
+    document.getElementById('modalViewDetailsLink');
+
+  // Store active product
+  let activeProduct = null;
+
+  // Product database
+  const productDatabase = {
+
+    1: {
+      id: "1",
+      title: "Oversized Knit Vest",
+      price: "$88.00",
+      image: "assets/products/product-1.jpg"
+    },
+
+    2: {
+      id: "2",
+      title: "Straight-Leg Trouser",
+      price: "$110.00",
+      image: "assets/products/product-2.jpg"
+    },
+
+    3: {
+      id: "3",
+      title: "Classic Heavy Hoodie",
+      price: "$95.00",
+      image: "assets/products/product-3.jpg"
+    },
+
+    4: {
+      id: "4",
+      title: "Relaxed Linen Trench",
+      price: "$145.00",
+      image: "assets/products/product-4.jpg"
+    },
+
+    5: {
+      id: "5",
+      title: "Tailored Wool Blazer",
+      price: "$210.00",
+      image: "assets/products/product-5.jpg"
+    },
+
+    6: {
+      id: "6",
+      title: "Relaxed Silk Shirt",
+      price: "$125.00",
+      image: "assets/products/product-6.jpg"
+    },
+
+    7: {
+      id: "7",
+      title: "Premium Mockneck Knit",
+      price: "$115.00",
+      image: "assets/products/product-7.jpg"
+    },
+
+    8: {
+      id: "8",
+      title: "Straight Raw Denim",
+      price: "$130.00",
+      image: "assets/products/product-8.jpg"
+    }
+
+  };
+
+  // ===============================
+  // OPEN QUICK VIEW
+  // ===============================
+
+  quickViewButtons.forEach(button => {
+
+    button.addEventListener('click', (event) => {
+
+      event.preventDefault();
+
+      event.stopPropagation();
+
+      const productId =
+        button.getAttribute('data-product-id');
+
+      const product =
+        productDatabase[productId];
+
+      if (!product) return;
+
+      activeProduct = product;
+
+      modalProductTitle.textContent =
+        product.title;
+
+      modalProductPrice.textContent =
+        product.price;
+
+      modalProductImage.src =
+        product.image;
+
+      modalProductImage.alt =
+        product.title;
+
+      modalViewDetailsLink.href =
+        `product.html?id=${product.id}`;
+
+      quickviewModalOverlay.classList.add('is-active');
+
+      document.body.style.overflow = 'hidden';
+
+    });
+
+  });
+
+  // ===============================
+  // CLOSE QUICK VIEW
+  // ===============================
+
+  function closeQuickViewModal() {
+
+    quickviewModalOverlay.classList.remove('is-active');
+
+    document.body.style.overflow = '';
+
+  }
+
+  if (closeQuickviewBtn) {
+
+    closeQuickviewBtn.addEventListener('click', () => {
+
+      closeQuickViewModal();
+
+    });
+
+  }
+
+  if (quickviewModalOverlay) {
+
+    quickviewModalOverlay.addEventListener('click', (event) => {
+
+      if (event.target === quickviewModalOverlay) {
+
+        closeQuickViewModal();
+
+      }
+
+    });
+
+  }
+
+  // ===============================
+  // ADD TO BAG
+  // ===============================
+
+  if (modalAddToBagBtn) {
+
+    modalAddToBagBtn.addEventListener('click', () => {
+
+      if (!activeProduct) return;
+
+      addItemToCart(
+        activeProduct.id,
+        activeProduct.title,
+        activeProduct.price,
+        activeProduct.image
+      );
+
+      syncCartUI();
+
+      closeQuickViewModal();
+
+    });
+
+  }
+
+
+
+  </script>
+
+  <div id="toastNotification" class="toast-notification"></div>
+</body>
+</html>
+
