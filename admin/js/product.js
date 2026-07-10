@@ -588,21 +588,23 @@ async function saveProduct(e) {
 
         };
 
+        const query = editingProductId
+            ? window.supabaseClient
+                .from("store_products")
+                .update(product)
+                .eq("id", editingProductId)
+                .select()
+                .single()
+            : window.supabaseClient
+                .from("store_products")
+                .insert(product)
+                .select()
+                .single();
+
         const {
-
             data: insertedProduct,
-
             error: productError
-
-        } = await window.supabaseClient
-
-            .from("store_products")
-
-            .insert(product)
-
-            .select()
-
-            .single();
+        } = await query;
 
         if (productError) throw productError;
 
@@ -618,7 +620,7 @@ async function saveProduct(e) {
 
         }
 
-        Utils.toast("Product created successfully.");
+        Utils.toast(editingProductId ? "Product updated successfully." : "Product created successfully.");
 
         loadPage("products");
 
@@ -636,7 +638,7 @@ async function saveProduct(e) {
 
         submitBtn.disabled=false;
 
-        submitBtn.textContent="Save Product";
+        submitBtn.textContent = editingProductId ? "Update Product" : "Save Product";
 
     }
 
@@ -780,6 +782,8 @@ async function populateProduct(){
     }
 
     document.querySelector(".page-title").textContent="Edit Product";
+    document.querySelector(".page-subtitle").textContent =
+        "Update product details, inventory, status, and images.";
 
     document.getElementById("productName").value=data.name;
 
@@ -797,7 +801,10 @@ async function populateProduct(){
 
     document.getElementById("active").checked=data.active;
 
-    renderExistingImages(data.store_product_images);
+    renderExistingImages(data.store_product_images || []);
+
+    const submitBtn = document.querySelector("#productForm button[type='submit']");
+    if (submitBtn) submitBtn.textContent = "Update Product";
 
 }
 // ==========================================

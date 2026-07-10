@@ -23,7 +23,7 @@
 
 </div>
 
-<div class="table-container">
+<div class="admin-panel admin-list-panel">
 
     <div class="table-toolbar">
 
@@ -34,7 +34,7 @@
             placeholder="Search products..."
         >
 
-        <select id="categoryFilter">
+        <select id="categoryFilter" class="filter-select">
 
             <option value="">All Categories</option>
 
@@ -42,7 +42,8 @@
 
     </div>
 
-    <table>
+    <div class="admin-table-scroll">
+    <table class="admin-table product-table">
 
         <thead>
 
@@ -73,6 +74,7 @@
         </tbody>
 
     </table>
+    </div>
 
     <div id="pagination" class="pagination"></div>
 

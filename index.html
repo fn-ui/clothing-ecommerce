@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STUDIO_FIT — Minimalist Apparel Store</title>
+  <title>STUDIO_FIT - Minimalist Apparel Store</title>
+  <meta name="description" content="Shop STUDIO_FIT minimalist apparel, everyday layers, tailored essentials, and seasonal wardrobe pieces.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="site.webmanifest">
   
   <!-- Link our custom clean stylesheet -->
   <link rel="stylesheet" href="style.css">
@@ -59,7 +62,7 @@
       <a href="product.html?id=1" class="product-card-link" style="text-decoration: none; color: inherit;">
         <div class="product-card">
           <div class="product-image-wrapper">
-            <img src="https://unsplash.com" alt="Oversized Wool Vest">
+            <img src="assets/hero-studio.svg" alt="Oversized Wool Vest">
             <span class="product-tag">New Drop</span>
           </div>
           <div class="product-details">
@@ -73,7 +76,7 @@
       <a href="product.html?id=2" class="product-card-link" style="text-decoration: none; color: inherit;">
         <div class="product-card">
           <div class="product-image-wrapper">
-            <img src="https://unsplash.com" alt="Tailored Trouser">
+            <img src="assets/hero-studio.svg" alt="Tailored Trouser">
           </div>
           <div class="product-details">
             <h3 class="product-title">Straight-Leg Trouser</h3>
@@ -86,7 +89,7 @@
       <a href="product.html?id=3" class="product-card-link" style="text-decoration: none; color: inherit;">
         <div class="product-card">
           <div class="product-image-wrapper">
-            <img src="https://unsplash.com" alt="Classic Heavy Hoodie">
+            <img src="assets/hero-studio.svg" alt="Classic Heavy Hoodie">
           </div>
           <div class="product-details">
             <h3 class="product-title">Classic Heavy Hoodie</h3>
@@ -99,7 +102,7 @@
       <a href="product.html?id=4" class="product-card-link" style="text-decoration: none; color: inherit;">
         <div class="product-card">
           <div class="product-image-wrapper">
-            <img src="https://unsplash.com" alt="Relaxed Linen Trench">
+            <img src="assets/hero-studio.svg" alt="Relaxed Linen Trench">
             <span class="product-tag sale-tag">Sale</span>
           </div>
           <div class="product-details">
@@ -117,7 +120,7 @@
       <div class="footer-newsletter">
         <h3>Join the Studio</h3>
         <p>Subscribe to receive early access to new seasonal collections, lookbooks, and exclusive design drops.</p>
-        <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Subscribed successfully!');">
+        <form class="newsletter-form">
           <input type="email" placeholder="Your email address" required autocomplete="email">
           <button type="submit">Subscribe</button>
         </form>
@@ -134,10 +137,10 @@
         </div>
         <div class="footer-link-group">
           <h4>Support</h4>
-          <a href="#">Shipping & Returns</a>
-          <a href="#">Sizing Guide</a>
-          <a href="#">Contact Us</a>
-          <a href="#">FAQs</a>
+          <a href="shipping-returns.html">Shipping & Returns</a>
+          <a href="size-guide.html">Sizing Guide</a>
+          <a href="contact.html">Contact Us</a>
+          <a href="faq.html">FAQs</a>
         </div>
       </div>
     </div>
@@ -145,8 +148,8 @@
     <div class="footer-bottom">
       <span class="copyright">&copy; 2026 STUDIO_FIT. All rights reserved.</span>
       <div class="footer-legal">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
       </div>
     </div>
   </footer>
@@ -181,99 +184,11 @@
   
 
   
-  <!-- JavaScript Interactions -->
-<script src="js/cart.js"></script>
-
-<script>
-  // =========================
-  // CART DRAWER FUNCTIONALITY
-  // =========================
-  const openCartBtn = document.getElementById("openCartBtn");
-  const closeCartBtn = document.getElementById("closeCartBtn");
-  const cartDrawerOverlay = document.getElementById("cartDrawerOverlay");
-
-  openCartBtn.addEventListener("click", () => {
-    cartDrawerOverlay.classList.add("is-active");
-  });
-
-  closeCartBtn.addEventListener("click", () => {
-    cartDrawerOverlay.classList.remove("is-active");
-  });
-
-  // Close cart when clicking outside panel
-  cartDrawerOverlay.addEventListener("click", (e) => {
-    if (e.target === cartDrawerOverlay) {
-      cartDrawerOverlay.classList.remove("is-active");
-    }
-  });
-
-  // =========================
-  // AUTH MODAL FUNCTIONALITY
-  // =========================
-  const accountToggleBtn = document.getElementById("accountToggleBtn");
-  const authModalOverlay = document.getElementById("authModalOverlay");
-  const closeAuthBtn = document.getElementById("closeAuthBtn");
-
-  const tabLoginBtn = document.getElementById("tabLoginBtn");
-  const tabRegisterBtn = document.getElementById("tabRegisterBtn");
-
-  const registerPanel = document.getElementById("registerPanel");
-  const loginPanel = document.getElementById("loginPanel");
-
-  // Switch between Sign In and Register forms
-  function setAuthTab(isLogin) {
-    if (isLogin) {
-      // Active tab styling
-      tabLoginBtn.classList.add("active");
-      tabRegisterBtn.classList.remove("active");
-
-      // Show login form
-      loginPanel.style.display = "block";
-
-      // Hide register form
-      registerPanel.style.display = "none";
-    } else {
-      // Active tab styling
-      tabRegisterBtn.classList.add("active");
-      tabLoginBtn.classList.remove("active");
-
-      // Show register form
-      registerPanel.style.display = "block";
-
-      // Hide login form
-      loginPanel.style.display = "none";
-    }
-  }
-
-  accountToggleBtn.addEventListener("click", () => {
-  window.location.href = "login.html";
-   });
-
-  // Close modal
-  closeAuthBtn.addEventListener("click", () => {
-    authModalOverlay.style.display = "none";
-  });
-
-  // Close modal when clicking outside
-  authModalOverlay.addEventListener("click", (e) => {
-    if (e.target === authModalOverlay) {
-      authModalOverlay.style.display = "none";
-    }
-  });
-
-  // Tab click events
-  tabLoginBtn.addEventListener("click", () => {
-    setAuthTab(true);
-  });
-
-  tabRegisterBtn.addEventListener("click", () => {
-    setAuthTab(false);
-  });
-
-  // Initial state
-  authModalOverlay.style.display = "none";
-  setAuthTab(false);
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-public.js"></script>
+  <script src="js/catalog.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/site.js"></script>
 <div id="toastNotification" class="toast-notification"></div>
 </body>
 </html>

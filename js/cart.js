@@ -4,7 +4,23 @@
 
 // Get cart from localStorage
 function getCartItems() {
-  return JSON.parse(localStorage.getItem('studioFitCart')) || [];
+  try {
+    const parsed = JSON.parse(localStorage.getItem('studioFitCart')) || [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    localStorage.removeItem('studioFitCart');
+    return [];
+  }
+}
+
+function escapeCartText(value) {
+  return String(value || '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  }[char]));
 }
 
 // Save cart + refresh UI
@@ -136,6 +152,8 @@ function syncCartUI() {
 
     const itemLineTotal =
       item.price * item.quantity;
+    const safeTitle = escapeCartText(item.title);
+    const safeImg = escapeCartText(item.img);
 
     runningSubtotal += itemLineTotal;
 
@@ -143,13 +161,13 @@ function syncCartUI() {
       <div class="cart-item-card" data-id="${item.id}">
         
         <div class="cart-item-image">
-          <img src="${item.img}" alt="${item.title}">
+          <img src="${safeImg}" alt="${safeTitle}">
         </div>
 
         <div class="cart-item-info">
 
           <div class="item-title-row">
-            <h4>${item.title}</h4>
+            <h4>${safeTitle}</h4>
 
             <span class="item-remove-btn">
               &times;

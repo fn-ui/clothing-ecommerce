@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1100" role="img" aria-label="Editorial studio wardrobe scene">
+  <defs>
+    <linearGradient id="wall" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#eee7dc"/>
+      <stop offset=".55" stop-color="#d9c6ad"/>
+      <stop offset="1" stop-color="#6f736d"/>
+    </linearGradient>
+    <filter id="softShadow">
+      <feDropShadow dx="0" dy="28" stdDeviation="30" flood-color="#251b14" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <rect width="1800" height="1100" fill="url(#wall)"/>
+  <path d="M0 790c310-115 650-145 1010-88 290 46 542 37 790-29v427H0z" fill="#f7f2ea" opacity=".72"/>
+  <g transform="translate(900 185)" filter="url(#softShadow)">
+    <rect x="-390" y="0" width="760" height="24" rx="12" fill="#302920"/>
+    <rect x="-330" y="24" width="16" height="735" fill="#302920"/>
+    <rect x="310" y="24" width="16" height="735" fill="#302920"/>
+    <path d="M-210 88c62 0 105 42 130 78l68 96-83 50-41-58v340h-168V254l-41 58-83-50 68-96c25-36 68-78 130-78z" fill="#ede2d3"/>
+    <path d="M45 96c55 0 94 35 118 68l80 109-82 58-43-65v352H-28V266l-43 65-82-58 80-109c24-33 63-68 118-68z" fill="#303339"/>
+    <path d="M298 105c48 0 86 30 113 66l75 99-72 52-49-59v324H231V263l-49 59-72-52 75-99c27-36 65-66 113-66z" fill="#c0a88d"/>
+  </g>
+  <text x="110" y="150" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700" fill="#2b2118" letter-spacing="8">STUDIO_FIT</text>
+</svg>

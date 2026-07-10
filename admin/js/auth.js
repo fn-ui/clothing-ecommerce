@@ -6,6 +6,25 @@ const loginForm = document.getElementById("loginForm");
 const loginBtn = document.getElementById("loginBtn");
 const loginMessage = document.getElementById("loginMessage");
 
+function adminClientReady() {
+    return Boolean(window.supabaseClient?.auth);
+}
+
+function setLoginMessage(message, type = "error") {
+    if (!loginMessage) return;
+    loginMessage.textContent = message;
+    loginMessage.style.color = type === "success" ? "#059669" : "#ef4444";
+}
+
+function withTimeout(promise, milliseconds, message) {
+    return Promise.race([
+        promise,
+        new Promise((_, reject) => {
+            setTimeout(() => reject(new Error(message)), milliseconds);
+        })
+    ]);
+}
+
 // ==========================================
 // LOGIN
 // ==========================================
@@ -20,10 +39,15 @@ async function login(e) {
 
     e.preventDefault();
 
+    if (!adminClientReady()) {
+        setLoginMessage("Admin login could not connect to Supabase. Check your internet connection and Supabase settings.");
+        return;
+    }
+
     loginBtn.disabled = true;
     loginBtn.textContent = "Signing In...";
 
-    loginMessage.textContent = "";
+    setLoginMessage("");
 
     try {
 
@@ -31,24 +55,32 @@ async function login(e) {
 
         const password = document.getElementById("password").value;
 
-        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+        const { data, error } = await withTimeout(
+            window.supabaseClient.auth.signInWithPassword({
 
-            email,
-            password
+                email,
+                password
 
-        });
+            }),
+            15000,
+            "Supabase login is taking too long. Check your internet connection, Supabase URL/key, and auth settings."
+        );
 
         if (error) throw error;
 
-        const { data: profile, error: profileError } = await window.supabaseClient
+        const { data: profile, error: profileError } = await withTimeout(
+            window.supabaseClient
 
             .from("store_profiles")
 
-            .select("*")
+            .select("id,email,role,full_name")
 
             .eq("id", data.user.id)
 
-            .single();
+            .single(),
+            15000,
+            "Signed in, but admin profile lookup timed out. Check store_profiles RLS policies."
+        );
 
         if (profileError) {
                 console.error("Profile Error:", profileError);
@@ -72,9 +104,7 @@ async function login(e) {
 
     catch (err) {
 
-        loginMessage.textContent = err.message;
-
-        loginMessage.style.color = "#ef4444";
+        setLoginMessage(err.message || "Sign in failed. Please try again.");
 
     }
 
@@ -93,6 +123,11 @@ async function login(e) {
 // ==========================================
 
 async function requireAdmin() {
+
+    if (!adminClientReady()) {
+        window.location.replace("login.html");
+        return false;
+    }
 
     const {
 
@@ -118,7 +153,7 @@ async function requireAdmin() {
 
         .from("store_profiles")
 
-        .select("*")
+        .select("id,email,role,full_name")
 
         .eq("id", session.user.id)
 
@@ -146,6 +181,8 @@ async function requireAdmin() {
 
     window.adminProfile = profile;
 
+    hydrateAdminChrome(profile);
+
     return true;
 
 }
@@ -155,6 +192,8 @@ async function requireAdmin() {
 // ==========================================
 
 async function redirectIfLoggedIn() {
+
+    if (!adminClientReady()) return;
 
     const {
 
@@ -188,7 +227,7 @@ async function redirectIfLoggedIn() {
 
 if (window.location.pathname.includes("login.html")) {
 
-    redirectIfLoggedIn();
+    window.addEventListener("DOMContentLoaded", redirectIfLoggedIn);
 
 }
 
@@ -204,10 +243,37 @@ async function logout() {
 
 }
 
+function hydrateAdminChrome(profile) {
+    if (!profile) return;
+
+    const displayName = profile.full_name || profile.email || "Admin";
+    const initials = displayName
+        .split("@")[0]
+        .split(" ")
+        .filter(Boolean)
+        .map(part => part.charAt(0))
+        .join("")
+        .substring(0, 2)
+        .toUpperCase() || "A";
+
+    document.querySelectorAll("#adminName").forEach(element => {
+        element.textContent = displayName;
+    });
+
+    document.querySelectorAll("#adminEmail").forEach(element => {
+        element.textContent = profile.email || "";
+    });
+
+    document.querySelectorAll("#adminAvatar, #settingsAvatar").forEach(element => {
+        element.textContent = initials;
+    });
+}
+
 // ==========================================
 // SESSION LISTENER
 // ==========================================
 
+if (adminClientReady()) {
 window.supabaseClient.auth.onAuthStateChange((event) => {
 
     if (event === "SIGNED_OUT") {
@@ -221,3 +287,4 @@ window.supabaseClient.auth.onAuthStateChange((event) => {
     }
 
 });
+}

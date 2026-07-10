@@ -1,165 +1,102 @@
 <div class="page-header">
-
     <div>
-
         <h1 class="page-title">Newsletter</h1>
-
-        <p class="page-subtitle">
-            Send newsletters and manage subscribers.
-        </p>
-
+        <p class="page-subtitle">Manage subscriber emails and prepare campaigns.</p>
     </div>
 
-    <button
-        class="btn btn-primary"
-        id="sendNewsletterBtn"
-    >
+    <button class="btn btn-primary" id="sendNewsletterBtn">
         <i class="fas fa-paper-plane"></i>
         Send Newsletter
     </button>
-
 </div>
 
-<section class="cards">
-
+<section class="cards newsletter-overview">
     <div class="card">
-
         <h4>Subscribers</h4>
-
         <h2 id="subscriberCount">0</h2>
-
         <span>Total subscribers</span>
-
     </div>
 
     <div class="card">
-
         <h4>Sent</h4>
-
         <h2 id="sentCount">0</h2>
-
         <span>Campaigns sent</span>
-
     </div>
 
     <div class="card">
-
         <h4>Drafts</h4>
-
         <h2 id="draftCount">0</h2>
-
         <span>Saved drafts</span>
-
     </div>
-
 </section>
 
-<div class="table-container">
+<section class="newsletter-layout">
+    <div class="admin-panel newsletter-compose-panel">
+        <h2 class="section-title">Compose Newsletter</h2>
 
-    <h2 class="section-title">
+        <form id="newsletterForm" class="admin-form-stack">
+            <div class="form-group">
+                <label>Subject</label>
+                <input
+                    type="text"
+                    id="newsletterSubject"
+                    placeholder="Newsletter subject"
+                    required
+                >
+            </div>
 
-        Compose Newsletter
+            <div class="form-group">
+                <label>Message</label>
+                <textarea
+                    id="newsletterMessage"
+                    rows="10"
+                    placeholder="Write your newsletter..."
+                    required
+                ></textarea>
+            </div>
 
-    </h2>
-
-    <form id="newsletterForm">
-
-        <div class="form-group">
-
-            <label>Subject</label>
-
-            <input
-                type="text"
-                id="newsletterSubject"
-                placeholder="Newsletter subject"
-                required
-            >
-
-        </div>
-
-        <div class="form-group">
-
-            <label>Message</label>
-
-            <textarea
-                id="newsletterMessage"
-                rows="10"
-                placeholder="Write your newsletter..."
-                required
-            ></textarea>
-
-        </div>
-
-        <button
-            type="submit"
-            class="btn btn-primary"
-        >
-            <i class="fas fa-paper-plane"></i>
-            Send Newsletter
-        </button>
-
-    </form>
-
-        </div>
-
-        <div class="table-container">
-
-            <div class="table-toolbar">
-
-            <input
-                type="search"
-                id="subscriberSearch"
-                class="search-input"
-                placeholder="Search subscribers..."
-            >
-
-            <button
-                class="btn btn-secondary"
-                id="exportSubscribers"
-            >
-                <i class="fas fa-download"></i>
-                Export CSV
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i>
+                Send Newsletter
             </button>
+        </form>
+    </div>
 
+    <div class="admin-panel newsletter-subscribers-panel">
+        <div class="table-toolbar">
+            <div>
+                <h2 class="section-title">Subscribers</h2>
+                <p class="admin-panel-subtitle">People who joined from the storefront newsletter form.</p>
+            </div>
+
+            <div class="toolbar-actions">
+                <input
+                    type="search"
+                    id="subscriberSearch"
+                    class="search-input"
+                    placeholder="Search subscribers..."
+                >
+
+                <button class="btn btn-secondary" id="exportSubscribers">
+                    <i class="fas fa-download"></i>
+                    Export CSV
+                </button>
+            </div>
         </div>
 
-        <table class="admin-table">
+        <div class="admin-table-scroll">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Date Joined</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
 
-            <thead>
-
-                <tr>
-
-                    <th>Email</th>
-                    <th>Date Joined</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody id="newsletterTable">
-
-            </tbody>
-
-        </table>
-
-        <thead>
-
-            <tr>
-
-                <th>Email</th>
-
-                <th>Date Joined</th>
-
-            </tr>
-
-        </thead>
-
-        <tbody id="newsletterTable">
-
-        </tbody>
-
-    </table>
-
-</div>
+                <tbody id="newsletterTable"></tbody>
+            </table>
+        </div>
+    </div>
+</section>

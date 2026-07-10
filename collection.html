@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>All Clothing — STUDIO_FIT</title>
+  <title>All Clothing - STUDIO_FIT</title>
+  <meta name="description" content="Shop all STUDIO_FIT clothing: knitwear, trousers, hoodies, outerwear, shirting, and denim.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="site.webmanifest">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,7 +28,7 @@
       <div class="search-wrapper">
         <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off">
       </div>
-      <button id="accountToggleBtn" class="account-portal-link" onclick="window.location.href='account.html'">Sign In</button>
+      <button id="accountToggleBtn" class="account-portal-link" onclick="window.location.href='login.html'">Sign In</button>
       <span class="cart-status" id="openCartBtn">Bag (0)</span>
     </div>
   </header>
@@ -86,7 +89,7 @@
       <a href="product.html?id=1" class="product-card-link" data-product-id="1" data-category="tops" data-price="88.00">
         <div class="product-card">
           <div class="product-image-wrapper">
-            <img src="https://unsplash.com" alt="Oversized Wool Vest">
+            <img src="assets/hero-studio.svg" alt="Oversized Wool Vest">
             <span class="product-tag">New Drop</span>
             <button class="quick-view-trigger-btn" data-product-id="1">Quick View</button>
           </div>
@@ -101,7 +104,7 @@
       <a href="product.html?id=2" class="product-card-link" data-category="bottoms" data-price="110.00">
         <div class="product-card">
           <div class="product-image-wrapper">
-            <img src="https://unsplash.com" alt="Tailored Trouser">
+            <img src="assets/hero-studio.svg" alt="Tailored Trouser">
             <button class="quick-view-trigger-btn" data-product-id="2">Quick View</button>
           </div>
           <div class="product-details">
@@ -115,7 +118,7 @@
       <a href="product.html?id=3" class="product-card-link" data-category="tops" data-price="95.00">
         <div class="product-card">
           <div class="product-image-wrapper">
-            <img src="https://unsplash.com" alt="Classic Heavy Hoodie">
+            <img src="assets/hero-studio.svg" alt="Classic Heavy Hoodie">
             <button class="quick-view-trigger-btn" data-product-id="3">Quick View</button>
           </div>
           <div class="product-details">
@@ -129,7 +132,7 @@
       <a href="product.html?id=4" class="product-card-link" data-category="outerwear" data-price="145.00">
         <div class="product-card">
           <div class="product-image-wrapper">
-            <img src="https://unsplash.com" alt="Relaxed Linen Trench">
+            <img src="assets/hero-studio.svg" alt="Relaxed Linen Trench">
             <span class="product-tag sale-tag">Sale</span>
             <button class="quick-view-trigger-btn" data-product-id="4">Quick View</button>
           </div>
@@ -144,7 +147,7 @@
       <a href="product.html?id=5" class="product-card-link" data-category="outerwear" data-price="210.00">
         <div class="product-card">
           <div class="product-image-wrapper">
-            <img src="https://unsplash.com" alt="Tailored Blazer">
+            <img src="assets/hero-studio.svg" alt="Tailored Blazer">
             <button class="quick-view-trigger-btn" data-product-id="5">Quick View</button>
           </div>
           <div class="product-details">
@@ -158,7 +161,7 @@
       <a href="product.html?id=6" class="product-card-link" data-category="tops" data-price="125.00">
         <div class="product-card">
           <div class="product-image-wrapper">
-            <img src="https://unsplash.com" alt="Silk Button Up">
+            <img src="assets/hero-studio.svg" alt="Silk Button Up">
             <button class="quick-view-trigger-btn" data-product-id="6">Quick View</button>
           </div>
           <div class="product-details">
@@ -172,7 +175,7 @@
       <a href="product.html?id=7" class="product-card-link" data-category="tops" data-price="115.00">
         <div class="product-card">
           <div class="product-image-wrapper">
-            <img src="https://unsplash.com" alt="Knit Mockneck Sweater">
+            <img src="assets/hero-studio.svg" alt="Knit Mockneck Sweater">
             <button class="quick-view-trigger-btn" data-product-id="7">Quick View</button>
           </div>
           <div class="product-details">
@@ -186,7 +189,7 @@
       <a href="product.html?id=8" class="product-card-link" data-category="bottoms" data-price="130.00">
         <div class="product-card">
           <div class="product-image-wrapper">
-            <img src="https://unsplash.com" alt="Raw Denim Jeans">
+            <img src="assets/hero-studio.svg" alt="Raw Denim Jeans">
             <button class="quick-view-trigger-btn" data-product-id="8">Quick View</button>
           </div>
           <div class="product-details">
@@ -226,314 +229,69 @@
   </div>
 
   <!-- Load Global Cart Engine First -->
+  <script src="js/catalog.js"></script>
   <script src="js/cart.js"></script>
+  <script src="js/site.js"></script>
   
 
-  <!-- Unified Catalog Management Script Panel -->
   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const filterToggleBtn = document.getElementById('filterToggleBtn');
+      const filterDrawer = document.getElementById('filterDrawer');
+      const categoryCheckboxes = document.querySelectorAll('input[name="category"]');
+      const inventoryCountText = document.querySelector('.product-inventory-count');
+      const searchInput = document.getElementById('searchInput');
+      const sortSelect = document.getElementById('sortSelect');
+      const productGrid = document.getElementById('productGrid');
 
-    // 1. Filter Slider Trigger Drawer
-    const filterToggleBtn = document.getElementById('filterToggleBtn');
-    const filterDrawer = document.getElementById('filterDrawer');
-
-    if (filterToggleBtn && filterDrawer) {
-      filterToggleBtn.addEventListener('click', () => {
-        filterDrawer.classList.toggle('is-open');
-        filterToggleBtn.classList.toggle('active');
-      });
-    }
-
-    // 2. Real-Time Product Grid Filtering & Text Search Logic
-    const categoryCheckboxes = document.querySelectorAll('input[name="category"]');
-    const productCards = document.querySelectorAll('.product-grid .product-card-link');
-    const inventoryCountText = document.querySelector('.product-inventory-count');
-    const searchInput = document.getElementById('searchInput');
-
-    function applyFiltersAndSearch() {
-      const activeFilters = Array.from(categoryCheckboxes).filter(i => i.checked).map(i => i.value);
-      const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
-      let visibleCount = 0;
-
-      productCards.forEach(card => {
-        const cardCategory = card.getAttribute('data-category');
-        const productTitleText = card.querySelector('.product-title').textContent.toLowerCase();
-
-        const matchesCategory = activeFilters.length === 0 || activeFilters.includes(cardCategory);
-        const matchesSearch = productTitleText.includes(searchTerm);
-
-        if (matchesCategory && matchesSearch) {
-          card.classList.remove('is-hidden');
-          card.style.display = 'block';
-          visibleCount++;
-        } else {
-          card.classList.add('is-hidden');
-          card.style.display = 'none';
-        }
-      });
-
-      if (inventoryCountText) {
-        inventoryCountText.textContent = `${visibleCount} Items`;
+      if (filterToggleBtn && filterDrawer) {
+        filterToggleBtn.addEventListener('click', () => {
+          filterDrawer.classList.toggle('is-open');
+          filterToggleBtn.classList.toggle('active');
+        });
       }
-    }
 
-    categoryCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', applyFiltersAndSearch);
-    });
+      const applyFiltersAndSearch = () => {
+        const productCards = document.querySelectorAll('.product-grid .product-card-link');
+        const activeFilters = Array.from(categoryCheckboxes).filter(input => input.checked).map(input => input.value);
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        let visibleCount = 0;
 
-    if (searchInput) {
-      searchInput.addEventListener('input', applyFiltersAndSearch);
-    }
-
-    // 3. Real-Time Product Grid Sorting System Logic
-    const sortSelect = document.getElementById('sortSelect');
-    const productGrid = document.getElementById('productGrid');
-
-    if (sortSelect && productGrid) {
-      sortSelect.addEventListener('change', () => {
-        const selectedValue = sortSelect.value;
-        const cardsArray = Array.from(productCards);
-
-        cardsArray.sort((cardA, cardB) => {
-          const priceA = parseFloat(cardA.getAttribute('data-price'));
-          const priceB = parseFloat(cardB.getAttribute('data-price'));
-
-          if (selectedValue === 'price-low') return priceA - priceB;
-          if (selectedValue === 'price-high') return priceB - priceA;
-          return 0;
+        productCards.forEach(card => {
+          const title = card.querySelector('.product-title')?.textContent.toLowerCase() || '';
+          const matchesCategory = activeFilters.length === 0 || activeFilters.includes(card.dataset.category);
+          const matchesSearch = title.includes(searchTerm);
+          card.style.display = matchesCategory && matchesSearch ? '' : 'none';
+          if (matchesCategory && matchesSearch) visibleCount++;
         });
 
-        productGrid.innerHTML = '';
-        cardsArray.forEach(card => productGrid.appendChild(card));
-      });
-    }
-
-    // 4. Drawer Toggle Panel Management
-    const openCartBtn = document.getElementById('openCartBtn');
-    const closeCartBtn = document.getElementById('closeCartBtn');
-    const cartDrawerOverlay = document.getElementById('cartDrawerOverlay');
-
-    if (openCartBtn && cartDrawerOverlay) {
-      openCartBtn.addEventListener('click', () => {
-        cartDrawerOverlay.classList.add('is-active');
-        document.body.style.overflow = 'hidden';
-      });
-    }
-
-    if (closeCartBtn && cartDrawerOverlay) {
-      const closeCartDrawer = () => {
-        cartDrawerOverlay.classList.remove('is-active');
-        document.body.style.overflow = '';
+        if (inventoryCountText) inventoryCountText.textContent = `${visibleCount} Items`;
       };
 
-      closeCartBtn.addEventListener('click', closeCartDrawer);
-      cartDrawerOverlay.addEventListener('click', (event) => {
-        if (event.target === cartDrawerOverlay) {
-          closeCartDrawer();
-        }
-      });
-    }
+      categoryCheckboxes.forEach(checkbox => checkbox.addEventListener('change', applyFiltersAndSearch));
+      if (searchInput) searchInput.addEventListener('input', applyFiltersAndSearch);
 
-
-  // ===============================
-  // QUICK VIEW PRODUCT DATA
-  // ===============================
-
-  const quickViewButtons =
-    document.querySelectorAll('.quick-view-trigger-btn');
-
-  const quickviewModalOverlay =
-    document.getElementById('quickviewModalOverlay');
-
-  const closeQuickviewBtn =
-    document.getElementById('closeQuickviewBtn');
-
-  const modalProductImage =
-    document.getElementById('modalProductImage');
-
-  const modalProductTitle =
-    document.getElementById('modalProductTitle');
-
-  const modalProductPrice =
-    document.getElementById('modalProductPrice');
-
-  const modalAddToBagBtn =
-    document.getElementById('modalAddToBagBtn');
-
-  const modalViewDetailsLink =
-    document.getElementById('modalViewDetailsLink');
-
-  // Store active product
-  let activeProduct = null;
-
-  // Product database
-  const productDatabase = {
-
-    1: {
-      id: "1",
-      title: "Oversized Knit Vest",
-      price: "$88.00",
-      image: "assets/products/product-1.jpg"
-    },
-
-    2: {
-      id: "2",
-      title: "Straight-Leg Trouser",
-      price: "$110.00",
-      image: "assets/products/product-2.jpg"
-    },
-
-    3: {
-      id: "3",
-      title: "Classic Heavy Hoodie",
-      price: "$95.00",
-      image: "assets/products/product-3.jpg"
-    },
-
-    4: {
-      id: "4",
-      title: "Relaxed Linen Trench",
-      price: "$145.00",
-      image: "assets/products/product-4.jpg"
-    },
-
-    5: {
-      id: "5",
-      title: "Tailored Wool Blazer",
-      price: "$210.00",
-      image: "assets/products/product-5.jpg"
-    },
-
-    6: {
-      id: "6",
-      title: "Relaxed Silk Shirt",
-      price: "$125.00",
-      image: "assets/products/product-6.jpg"
-    },
-
-    7: {
-      id: "7",
-      title: "Premium Mockneck Knit",
-      price: "$115.00",
-      image: "assets/products/product-7.jpg"
-    },
-
-    8: {
-      id: "8",
-      title: "Straight Raw Denim",
-      price: "$130.00",
-      image: "assets/products/product-8.jpg"
-    }
-
-  };
-
-  // ===============================
-  // OPEN QUICK VIEW
-  // ===============================
-
-  quickViewButtons.forEach(button => {
-
-    button.addEventListener('click', (event) => {
-
-      event.preventDefault();
-
-      event.stopPropagation();
-
-      const productId =
-        button.getAttribute('data-product-id');
-
-      const product =
-        productDatabase[productId];
-
-      if (!product) return;
-
-      activeProduct = product;
-
-      modalProductTitle.textContent =
-        product.title;
-
-      modalProductPrice.textContent =
-        product.price;
-
-      modalProductImage.src =
-        product.image;
-
-      modalProductImage.alt =
-        product.title;
-
-      modalViewDetailsLink.href =
-        `product.html?id=${product.id}`;
-
-      quickviewModalOverlay.classList.add('is-active');
-
-      document.body.style.overflow = 'hidden';
-
-    });
-
-  });
-
-  // ===============================
-  // CLOSE QUICK VIEW
-  // ===============================
-
-  function closeQuickViewModal() {
-
-    quickviewModalOverlay.classList.remove('is-active');
-
-    document.body.style.overflow = '';
-
-  }
-
-  if (closeQuickviewBtn) {
-
-    closeQuickviewBtn.addEventListener('click', () => {
-
-      closeQuickViewModal();
-
-    });
-
-  }
-
-  if (quickviewModalOverlay) {
-
-    quickviewModalOverlay.addEventListener('click', (event) => {
-
-      if (event.target === quickviewModalOverlay) {
-
-        closeQuickViewModal();
-
+      if (sortSelect && productGrid) {
+        sortSelect.addEventListener('change', () => {
+          const cards = Array.from(productGrid.querySelectorAll('.product-card-link'));
+          cards.sort((a, b) => {
+            const priceA = Number(a.dataset.price);
+            const priceB = Number(b.dataset.price);
+            if (sortSelect.value === 'price-low') return priceA - priceB;
+            if (sortSelect.value === 'price-high') return priceB - priceA;
+            return Number(a.dataset.productId || 0) - Number(b.dataset.productId || 0);
+          });
+          cards.forEach(card => productGrid.appendChild(card));
+          applyFiltersAndSearch();
+        });
       }
 
+      const initialSearch = new URLSearchParams(window.location.search).get('search');
+      if (initialSearch && searchInput) {
+        searchInput.value = initialSearch;
+      }
+      applyFiltersAndSearch();
     });
-
-  }
-
-  // ===============================
-  // ADD TO BAG
-  // ===============================
-
-  if (modalAddToBagBtn) {
-
-    modalAddToBagBtn.addEventListener('click', () => {
-
-      if (!activeProduct) return;
-
-      addItemToCart(
-        activeProduct.id,
-        activeProduct.title,
-        activeProduct.price,
-        activeProduct.image
-      );
-
-      syncCartUI();
-
-      closeQuickViewModal();
-
-    });
-
-  }
-
-
-
   </script>
 
   <div id="toastNotification" class="toast-notification"></div>

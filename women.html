@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>women — STUDIO_FIT</title>
+  <title>Women - STUDIO_FIT</title>
+  <meta name="description" content="Shop STUDIO_FIT womenswear: silk shirts, knits, trench coats, trousers, and tailored layers.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="site.webmanifest">
 
   <link rel="stylesheet" href="style.css">
 
@@ -58,14 +61,14 @@
 
 <main class="collection-workspace">
 
-  <div class="product-grid">
+  <div class="product-grid" data-catalog-grid="women">
 
     <!-- PRODUCT 1 -->
     <a href="product.html?id=101" class="product-card-link">
       <div class="product-card">
 
         <div class="product-image-wrapper">
-          <img src="" alt="Relaxed Hoodie">
+          <img src="assets/hero-studio.svg" alt="Relaxed Hoodie">
 
           <button
             class="quick-view-trigger-btn add-cart-btn"
@@ -92,7 +95,7 @@
       <div class="product-card">
 
         <div class="product-image-wrapper">
-          <img src="" alt="Tailored Jacket">
+          <img src="assets/hero-studio.svg" alt="Tailored Jacket">
 
           <button
             class="quick-view-trigger-btn add-cart-btn"
@@ -119,7 +122,7 @@
       <div class="product-card">
 
         <div class="product-image-wrapper">
-          <img src="" alt="Premium Knit">
+          <img src="assets/hero-studio.svg" alt="Premium Knit">
 
           <button
             class="quick-view-trigger-btn add-cart-btn"
@@ -190,24 +193,9 @@
   </div>
 </div>
 
+<script src="js/catalog.js"></script>
 <script src="js/cart.js"></script>
-<script src="js/quickview.js"></script>
-
-<script>
-
-document.querySelectorAll('.add-cart-btn').forEach(button => {
-  button.addEventListener('click', (event) => {
-    event.preventDefault();
-    addItemToCart(
-      button.dataset.id,
-      button.dataset.title,
-      button.dataset.price,
-      button.dataset.img
-    );
-  });
-});
-
-</script>
+<script src="js/site.js"></script>
 
 </body>
 </html>

@@ -25,9 +25,10 @@
 
 </div>
 
-<div class="table-container">
+<div class="admin-panel admin-list-panel">
 
-    <table>
+    <div class="admin-table-scroll">
+    <table class="admin-table">
 
         <thead>
 
@@ -50,22 +51,26 @@
         </tbody>
 
     </table>
+    </div>
 
 </div>
 
 <!-- Modal -->
 
-<div id="categoryModal" class="modal">
+<div id="categoryModal" class="admin-modal-backdrop">
 
-    <div class="modal-content">
+    <div class="admin-modal-card">
 
+        <div class="admin-modal-header">
         <h2 id="categoryModalTitle">
 
             Add Category
 
         </h2>
+        <button type="button" class="modal-close" onclick="closeCategoryModal()">&times;</button>
+        </div>
 
-        <form id="categoryForm">
+        <form id="categoryForm" class="admin-modal-form">
 
             <input
                 type="hidden"

@@ -4,14 +4,6 @@
 
 let pageContent;
 
-window.addEventListener("DOMContentLoaded", () => {
-
-    pageContent = document.getElementById("pageContent");
-
-    loadPage("dashboard");
-
-});
-
 const routes = {
     dashboard: {
         file: "pages/dashboard.html",

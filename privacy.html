@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - STUDIO_FIT</title>
+  <meta name="description" content="Privacy policy for STUDIO_FIT customer data and storefront usage.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="boutique-header">
+    <div class="brand-logo"><a href="index.html">STUDIO_FIT</a></div>
+    <nav class="navigation-links"><a href="collection.html">New Arrivals</a><a href="men.html">Men</a><a href="women.html">Women</a><a href="kids.html">Kids</a><a href="lookbook.html">Lookbook</a></nav>
+    <div class="utility-actions"><button id="accountToggleBtn" class="account-portal-link" onclick="window.location.href='login.html'">Sign In</button><span class="cart-status" id="openCartBtn">Bag (0)</span></div>
+  </header>
+
+  <main class="support-page legal-copy">
+    <span class="meta-kicker">Legal</span>
+    <h1>Privacy Policy</h1>
+    <p>This page is a starter policy and should be reviewed by a qualified professional before launch.</p>
+    <h2>Information We Collect</h2>
+    <p>We may collect contact, shipping, payment, and account information needed to process orders and provide customer support.</p>
+    <h2>How We Use Information</h2>
+    <p>Information is used to fulfill orders, manage accounts, respond to support requests, and improve the shopping experience.</p>
+    <h2>Your Choices</h2>
+    <p>You can request account updates, marketing removal, or data support by contacting the store support address.</p>
+  </main>
+
+  <div class="cart-drawer-overlay" id="cartDrawerOverlay"><div class="cart-drawer-panel"><div class="drawer-header"><h2>Your Shopping Bag (<span id="cartCount">0</span>)</h2><div class="drawer-header-actions"><button class="clear-cart-link-btn" id="clearCartBtn">Clear All</button><button class="close-drawer-btn" id="closeCartBtn">&times;</button></div></div><div class="drawer-items-list"></div><div class="drawer-summary-footer"><div class="summary-subtotal-row"><span>Subtotal</span><span class="subtotal-amount">$0.00</span></div><p class="summary-shipping-note">Shipping, taxes, and discounts calculated at checkout.</p><button class="btn-checkout-solid" onclick="window.location.href='checkout.html'">Proceed To Checkout</button></div></div></div>
+  <script src="js/catalog.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/site.js"></script>
+</body>
+</html>

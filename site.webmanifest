@@ -1,0 +1,16 @@
+{
+  "name": "STUDIO_FIT",
+  "short_name": "STUDIO_FIT",
+  "description": "Minimal apparel ecommerce storefront.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f6f3ee",
+  "theme_color": "#2b2118",
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

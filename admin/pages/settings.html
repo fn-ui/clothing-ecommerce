@@ -1,132 +1,84 @@
 <div class="page-header">
-
     <div>
-
         <h1 class="page-title">Settings</h1>
-
-        <p class="page-subtitle">
-            Manage your store settings.
-        </p>
-
+        <p class="page-subtitle">Manage your admin account and launch checklist.</p>
     </div>
-
 </div>
 
-<div class="table-container">
+<section class="settings-grid">
+    <div class="table-container">
+        <h2 class="section-title">Admin Account</h2>
 
-    <h2 class="section-title">
-        Store Information
-    </h2>
+        <div class="profile-card settings-profile-card">
+            <div class="profile-avatar" id="settingsAvatar">A</div>
+            <div class="profile-info">
+                <h3 id="adminName">Admin</h3>
+                <p id="adminEmail">admin@email.com</p>
+            </div>
+        </div>
 
-    <form id="settingsForm">
-
-        <div class="form-grid">
-
+        <form id="settingsForm" class="settings-form">
             <div class="form-group">
-
-                <label>Store Name</label>
-
-                <input
-                    type="text"
-                    id="storeName"
-                    placeholder="Store Name"
-                >
-
+                <label>Full Name</label>
+                <input type="text" id="settingsFullName" placeholder="Administrator">
             </div>
 
             <div class="form-group">
-
-                <label>Store Email</label>
-
-                <input
-                    type="email"
-                    id="storeEmail"
-                    placeholder="Email"
-                >
-
+                <label>Email</label>
+                <input type="email" id="settingsEmail" readonly>
             </div>
 
-            <div class="form-group">
-
-                <label>Phone</label>
-
-                <input
-                    type="text"
-                    id="storePhone"
-                    placeholder="Phone Number"
-                >
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Currency</label>
-
-                <select id="storeCurrency">
-
-                    <option value="KES">KES</option>
-
-                    <option value="USD">USD</option>
-
-                    <option value="EUR">EUR</option>
-
-                </select>
-
-            </div>
-
-        </div>
-
-        <div class="form-group">
-
-            <label>Store Address</label>
-
-            <textarea
-                id="storeAddress"
-                rows="4"
-                placeholder="Store Address"
-            ></textarea>
-
-        </div>
-
-        <button
-            type="submit"
-            class="btn btn-primary"
-        >
-
-            <i class="fas fa-save"></i>
-
-            Save Settings
-
-        </button>
-
-    </form>
-
-</div>
-
-<div class="table-container">
-
-    <h2 class="section-title">
-        Admin Account
-    </h2>
-
-    <div class="profile-card">
-
-        <div class="profile-avatar" id="settingsAvatar">
-            A
-        </div>
-
-        <div class="profile-info">
-
-            <h3 id="adminName">
-                Admin
-            </h3>
-
-            <p id="adminEmail">
-                admin@email.com
-            </p>
-
-        </div>
-
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                Save Admin Profile
+            </button>
+        </form>
     </div>
 
+    <div class="table-container">
+        <h2 class="section-title">Change Password</h2>
+
+        <form id="passwordForm" class="settings-form">
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="newPassword" minlength="8" autocomplete="new-password" required>
+            </div>
+
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" id="confirmPassword" minlength="8" autocomplete="new-password" required>
+            </div>
+
+            <button type="submit" class="btn btn-secondary">
+                Update Password
+            </button>
+        </form>
+    </div>
+</section>
+
+<div class="table-container">
+    <h2 class="section-title">Launch Checklist</h2>
+
+    <div class="launch-checklist">
+        <div class="launch-item done">
+            <strong>Supabase tables detected</strong>
+            <span>Using store_products, store_product_images, store_categories, store_newsletter, and store_profiles.</span>
+        </div>
+        <div class="launch-item">
+            <strong>Supabase policies</strong>
+            <span>Allow public newsletter insert, public read for active products/categories/images, and admin-only writes.</span>
+        </div>
+        <div class="launch-item">
+            <strong>Payments</strong>
+            <span>Connect checkout to Stripe, Paystack, Flutterwave, PayPal, or another payment provider.</span>
+        </div>
+        <div class="launch-item">
+            <strong>Vercel deployment</strong>
+            <span>Deploy directly to Vercel and use the free .vercel.app URL. Custom domain and SEO files can come later.</span>
+        </div>
+        <div class="launch-item">
+            <strong>Product photography</strong>
+            <span>Upload real product images from this admin panel or directly into Supabase storage.</span>
+        </div>
+    </div>
 </div>

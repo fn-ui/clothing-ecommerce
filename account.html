@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Customer Portal — STUDIO_FIT</title>
+  <title>Customer Portal - STUDIO_FIT</title>
+  <meta name="description" content="Manage your STUDIO_FIT account, order history, addresses, and profile details.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="site.webmanifest">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -80,11 +83,11 @@
             </div>
             <div class="order-card-items-preview">
               <div class="preview-item-thumbnail">
-                <img src="https://unsplash.com" alt="Item Preview">
+                <img src="assets/hero-studio.svg" alt="Item Preview">
                 <div class="thumbnail-count-bubble">1</div>
               </div>
               <div class="preview-item-info-strings">
-                swap<h5>Oversized Knit Vest</h5>
+                <h5>Oversized Knit Vest</h5>
                 <span>Size: Medium / Carbon Grey</span>
               </div>
               <button class="btn-outline-action" onclick="alert('Opening tracking link...');">Track Consignment</button>
@@ -110,7 +113,7 @@
             </div>
             <div class="order-card-items-preview">
               <div class="preview-item-thumbnail">
-                <img src="https://unsplash.com" alt="Item Preview">
+                <img src="assets/hero-studio.svg" alt="Item Preview">
                 <div class="thumbnail-count-bubble">1</div>
               </div>
               <div class="preview-item-info-strings">
@@ -219,7 +222,9 @@
   </div>
 
   <!-- Load Global Cart Engine -->
+<script src="js/catalog.js"></script>
 <script src="js/cart.js"></script>
+<script src="js/site.js"></script>
 
 <!-- Interactive Account Logic -->
 <script>

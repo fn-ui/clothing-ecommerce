@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secure Checkout — STUDIO_FIT</title>
+  <title>Secure Checkout - STUDIO_FIT</title>
+  <meta name="description" content="Complete your STUDIO_FIT order with secure checkout.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="site.webmanifest">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +17,7 @@
   <!-- Minimal Checkout Header -->
   <header class="checkout-minimal-header">
     <div class="brand-logo"><a href="index.html">STUDIO_FIT</a></div>
-    <div class="secure-badge">🔒 Secure Checkout</div>
+    <div class="secure-badge">Secure Checkout</div>
   </header>
 
   <!-- Split Screen Checkout Frame -->
@@ -22,7 +25,7 @@
     
     <!-- Left Form Workspace: Shipping & Billing Details -->
     <section class="checkout-form-section">
-      <form class="checkout-form" onsubmit="event.preventDefault(); alert('Order Placed Successfully!');">
+      <form class="checkout-form" id="checkoutForm">
         
         <div class="form-block">
           <h3>Contact Information</h3>
@@ -49,18 +52,50 @@
 
         <div class="form-block">
           <h3>Payment Method</h3>
-          <div class="payment-card-mock">
+
+          <div class="payment-method-grid" role="radiogroup" aria-label="Payment method">
+            <label class="payment-method-option is-selected">
+              <input type="radio" name="paymentMethod" value="mpesa" checked>
+              <span class="payment-method-name">M-Pesa</span>
+              <span class="payment-method-note">Pay with STK push</span>
+            </label>
+
+            <label class="payment-method-option">
+              <input type="radio" name="paymentMethod" value="paypal">
+              <span class="payment-method-name">PayPal</span>
+              <span class="payment-method-note">Pay with PayPal account</span>
+            </label>
+
+            <label class="payment-method-option">
+              <input type="radio" name="paymentMethod" value="paystack">
+              <span class="payment-method-name">Paystack</span>
+              <span class="payment-method-note">Card, bank, or mobile money</span>
+            </label>
+          </div>
+
+          <div class="payment-panel is-active" data-payment-panel="mpesa">
+            <p class="payment-panel-note">Enter the Safaricom number that should receive the payment prompt.</p>
             <div class="input-row">
-              <input type="text" placeholder="Card number" required autocomplete="cc-number">
+              <input type="tel" id="mpesaPhone" placeholder="M-Pesa phone number e.g. 254712345678" autocomplete="tel" required>
             </div>
-            <div class="input-grid-2">
-              <input type="text" placeholder="Expiration date (MM / YY)" required autocomplete="cc-exp">
-              <input type="text" placeholder="Security code (CVV)" required autocomplete="cc-csc">
+          </div>
+
+          <div class="payment-panel" data-payment-panel="paypal">
+            <p class="payment-panel-note">You will be redirected to PayPal after order review when PayPal is connected.</p>
+            <div class="input-row">
+              <input type="email" id="paypalEmail" placeholder="PayPal email address" autocomplete="email" disabled>
+            </div>
+          </div>
+
+          <div class="payment-panel" data-payment-panel="paystack">
+            <p class="payment-panel-note">Paystack checkout will open after order review when Paystack is connected.</p>
+            <div class="input-row">
+              <input type="email" id="paystackEmail" placeholder="Payment email address" autocomplete="email" disabled>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="btn-submit-order">Place Order &rarr;</button>
+        <button type="submit" class="btn-submit-order" id="checkoutSubmitBtn">Continue With M-Pesa</button>
       </form>
     </section>
 
@@ -93,6 +128,7 @@
   </main>
 
   <!-- Load Global Cart Engine Script First -->
+  <script src="js/catalog.js"></script>
   <script src="js/cart.js"></script>
 
   <!-- Checkout Computation Management Script -->
@@ -130,28 +166,66 @@
     subtotalElement.textContent = formatted;
     totalElement.textContent = formatted;
 
+    const paymentOptions = document.querySelectorAll('input[name="paymentMethod"]');
+    const paymentPanels = document.querySelectorAll('.payment-panel');
+    const submitButton = document.getElementById('checkoutSubmitBtn');
+
+    const methodLabels = {
+      mpesa: 'M-Pesa',
+      paypal: 'PayPal',
+      paystack: 'Paystack'
+    };
+
+    function setPaymentMethod(method) {
+      document.querySelectorAll('.payment-method-option').forEach(option => {
+        option.classList.toggle(
+          'is-selected',
+          option.querySelector('input')?.value === method
+        );
+      });
+
+      paymentPanels.forEach(panel => {
+        const isActive = panel.dataset.paymentPanel === method;
+        panel.classList.toggle('is-active', isActive);
+
+        panel.querySelectorAll('input').forEach(input => {
+          input.disabled = !isActive;
+          input.required = isActive;
+        });
+      });
+
+      if (submitButton) {
+        submitButton.textContent = `Continue With ${methodLabels[method]}`;
+      }
+    }
+
+    paymentOptions.forEach(option => {
+      option.addEventListener('change', () => setPaymentMethod(option.value));
+    });
+
+    setPaymentMethod(
+      document.querySelector('input[name="paymentMethod"]:checked')?.value || 'mpesa'
+    );
+
     // ===============================
-    // PLACE ORDER
+    // PAYMENT HANDOFF
     // ===============================
     checkoutForm.addEventListener('submit', (e) => {
 
       e.preventDefault();
 
-      // Show toast
+      const selectedMethod =
+        document.querySelector('input[name="paymentMethod"]:checked')?.value || 'mpesa';
+      const selectedLabel = methodLabels[selectedMethod];
+
       toast.textContent =
-        'Order placed successfully ✓';
+        `${selectedLabel} selected. Connect the ${selectedLabel} gateway to collect payment.`;
 
       toast.classList.add('show');
 
-      // Clear cart
-      localStorage.removeItem('studioFitCart');
-
-      // Redirect after short delay
       setTimeout(() => {
 
         toast.classList.remove('show');
-
-        window.location.href = 'index.html';
 
       }, 2200);
     });
