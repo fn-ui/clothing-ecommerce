@@ -83,7 +83,7 @@
     </div>
 
     <!-- Expanded Inventory Collection Grid Layout -->
-    <div class="product-grid" id="productGrid">
+    <div class="product-grid" id="productGrid" data-catalog-grid="new">
 
       <!-- Item Card 1 -->
       <a href="product.html?id=1" class="product-card-link" data-product-id="1" data-category="tops" data-price="88.00">
@@ -229,6 +229,8 @@
   </div>
 
   <!-- Load Global Cart Engine First -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-public.js"></script>
   <script src="js/catalog.js"></script>
   <script src="js/cart.js"></script>
   <script src="js/site.js"></script>
@@ -270,6 +272,7 @@
 
       categoryCheckboxes.forEach(checkbox => checkbox.addEventListener('change', applyFiltersAndSearch));
       if (searchInput) searchInput.addEventListener('input', applyFiltersAndSearch);
+      document.addEventListener('studio:products-rendered', applyFiltersAndSearch);
 
       if (sortSelect && productGrid) {
         sortSelect.addEventListener('change', () => {

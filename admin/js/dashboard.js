@@ -14,6 +14,8 @@ async function loadDashboard() {
 
     await loadRecentProducts();
 
+    await loadPublicActivity();
+
     initChart();
 
     bindDashboardButtons();
@@ -47,6 +49,8 @@ async function loadStats() {
         .select("*", { count: "exact", head: true })
         .eq("role", "customer");
 
+    const publicCustomerLeads = await countTableRows("store_customer_leads");
+
     // Featured
     const { count: featured } = await window.supabaseClient
         .from("store_products")
@@ -65,10 +69,16 @@ async function loadStats() {
         .select("*", { count: "exact", head: true })
         .eq("stock", 0);
 
+    const newsletter = await countTableRows("store_newsletter");
+
+    const checkoutIntents = await countTableRows("store_checkout_intents");
+
     document.getElementById("productCount").textContent = products || 0;
     document.getElementById("categoryCount").textContent = categories || 0;
     document.getElementById("imageCount").textContent = images || 0;
-    document.getElementById("customerCount").textContent = customers || 0;
+    document.getElementById("customerCount").textContent = (customers || 0) + publicCustomerLeads;
+    setDashboardText("newsletterCount", newsletter);
+    setDashboardText("checkoutIntentCount", checkoutIntents);
 
     document.getElementById("activeProducts").textContent = active || 0;
     document.getElementById("featuredProducts").textContent = featured || 0;
@@ -76,6 +86,24 @@ async function loadStats() {
 
     document.getElementById("productGrowth").textContent =
         `${products || 0} products available`;
+
+}
+
+async function countTableRows(tableName) {
+
+    const { count, error } = await window.supabaseClient
+        .from(tableName)
+        .select("*", { count: "exact", head: true });
+
+    if (error) {
+
+        console.warn(`${tableName} count unavailable:`, error.message);
+
+        return 0;
+
+    }
+
+    return count || 0;
 
 }
 
@@ -173,6 +201,125 @@ async function loadRecentProducts() {
 }
 
 // ======================================
+// PUBLIC ACTIVITY
+// ======================================
+
+async function loadPublicActivity() {
+
+    const feed = document.getElementById("activityFeed");
+
+    if (!feed) return;
+
+    const activity = [];
+
+    const { data: customers } = await window.supabaseClient
+        .from("store_profiles")
+        .select("email,full_name,created_at")
+        .eq("role", "customer")
+        .order("created_at", { ascending: false })
+        .limit(4);
+
+    (customers || []).forEach(customer => {
+
+        activity.push({
+            type: "customer",
+            title: customer.full_name || customer.email,
+            detail: "Customer captured from public account flow.",
+            created_at: customer.created_at
+        });
+
+    });
+
+    const { data: customerLeads, error: customerLeadError } = await window.supabaseClient
+        .from("store_customer_leads")
+        .select("customer_email,customer_name,created_at")
+        .order("created_at", { ascending: false })
+        .limit(4);
+
+    if (!customerLeadError) {
+
+        (customerLeads || []).forEach(customer => {
+
+            activity.push({
+                type: "customer",
+                title: customer.customer_name || customer.customer_email,
+                detail: "Customer lead captured from public account flow.",
+                created_at: customer.created_at
+            });
+
+        });
+
+    }
+
+    const { data: subscribers } = await window.supabaseClient
+        .from("store_newsletter")
+        .select("email,created_at")
+        .order("created_at", { ascending: false })
+        .limit(4);
+
+    (subscribers || []).forEach(subscriber => {
+
+        activity.push({
+            type: "newsletter",
+            title: subscriber.email,
+            detail: "Newsletter signup from public storefront.",
+            created_at: subscriber.created_at
+        });
+
+    });
+
+    const { data: checkoutIntents, error: checkoutError } = await window.supabaseClient
+        .from("store_checkout_intents")
+        .select("customer_email,customer_name,total,payment_method,payment_status,created_at")
+        .order("created_at", { ascending: false })
+        .limit(4);
+
+    if (!checkoutError) {
+
+        (checkoutIntents || []).forEach(intent => {
+
+            activity.push({
+                type: "checkout",
+                title: intent.customer_name || intent.customer_email || "Checkout lead",
+                detail: `${formatDashboardCurrency(intent.total || 0)} via ${intent.payment_method || "payment method"}.`,
+                created_at: intent.created_at
+            });
+
+        });
+
+    }
+
+    activity.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+    if (!activity.length) {
+
+        feed.innerHTML = `
+            <div class="activity-item">
+                <div class="activity-dot"></div>
+                <div>
+                    <strong>No public activity yet</strong>
+                    <small>Customer registrations, newsletter signups, and checkout leads will appear here.</small>
+                </div>
+            </div>
+        `;
+
+        return;
+
+    }
+
+    feed.innerHTML = activity.slice(0, 8).map(item => `
+        <div class="activity-item">
+            <div class="activity-dot ${item.type}"></div>
+            <div>
+                <strong>${escapeDashboardText(item.title)}</strong>
+                <small>${escapeDashboardText(item.detail)}</small>
+            </div>
+        </div>
+    `).join("");
+
+}
+
+// ======================================
 // CHART
 // ======================================
 
@@ -199,7 +346,9 @@ function initChart() {
                 "Products",
                 "Categories",
                 "Images",
-                "Customers"
+                "Customers",
+                "Checkout",
+                "Newsletter"
 
             ],
 
@@ -217,7 +366,11 @@ function initChart() {
 
                         Number(document.getElementById("imageCount").textContent),
 
-                        Number(document.getElementById("customerCount").textContent)
+                        Number(document.getElementById("customerCount").textContent),
+
+                        Number(document.getElementById("checkoutIntentCount")?.textContent || 0),
+
+                        Number(document.getElementById("newsletterCount")?.textContent || 0)
 
                     ]
 
@@ -259,6 +412,34 @@ function initChart() {
 
 }
 
+function setDashboardText(id, value) {
+
+    const element = document.getElementById(id);
+
+    if (element) element.textContent = value || 0;
+
+}
+
+function formatDashboardCurrency(value) {
+
+    if (window.Utils?.currency) return Utils.currency(value);
+
+    return `$${Number(value || 0).toFixed(2)}`;
+
+}
+
+function escapeDashboardText(value) {
+
+    return String(value || "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    }[char]));
+
+}
+
 // ======================================
 // BUTTONS
 // ======================================
@@ -292,6 +473,18 @@ function bindDashboardButtons() {
     document.getElementById("quickSettings")?.addEventListener("click", () => {
 
         loadPage("settings");
+
+    });
+
+    document.getElementById("quickCustomers")?.addEventListener("click", () => {
+
+        loadPage("customers");
+
+    });
+
+    document.getElementById("quickPayments")?.addEventListener("click", () => {
+
+        loadPage("payments");
 
     });
 

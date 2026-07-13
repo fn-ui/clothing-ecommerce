@@ -156,6 +156,8 @@
 
 
   <!-- Load Global Cart Engine First -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-public.js"></script>
   <script src="js/catalog.js"></script>
   <script src="js/cart.js"></script>
   <script src="js/product-page.js"></script>
@@ -200,7 +202,9 @@ if (addToBagBtn) {
     const pPrice = addToBagBtn.dataset.productPrice;
     const pImg = addToBagBtn.dataset.productImg;
 
-    addItemToCart(pid, pTitle, pPrice, pImg);
+    const added = addItemToCart(pid, pTitle, pPrice, pImg);
+
+    if (!added) return;
 
     // Update UI immediately
     syncCartUI();

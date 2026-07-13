@@ -25,9 +25,23 @@
 
 </div>
 
-<form id="productForm" class="form">
+<form id="productForm" class="form product-editor-form">
 
-    <div class="form-row">
+    <section class="product-editor-card">
+
+        <div class="product-editor-section-header">
+
+            <div>
+
+                <h2>Product Details</h2>
+
+                <p>Name, description, category, and pricing information.</p>
+
+            </div>
+
+        </div>
+
+    <div class="form-row product-editor-grid">
 
         <div class="form-control">
 
@@ -55,7 +69,7 @@
 
     </div>
 
-    <div class="form-control">
+    <div class="form-control product-editor-full">
 
         <label>Description</label>
 
@@ -65,7 +79,7 @@
 
     </div>
 
-    <div class="form-row">
+    <div class="form-row product-editor-grid">
 
         <div class="form-control">
 
@@ -94,7 +108,7 @@
 
     </div>
 
-    <div class="form-row">
+    <div class="form-row product-editor-grid product-editor-stock-row">
 
         <div class="form-control">
 
@@ -109,7 +123,7 @@
 
         </div>
 
-        <div class="form-control switches">
+        <div class="form-control switches product-status-options">
 
             <label>
 
@@ -119,6 +133,17 @@
                 >
 
                 Featured Product
+
+            </label>
+
+            <label>
+
+                <input
+                    type="checkbox"
+                    id="newArrival"
+                >
+
+                New Arrival
 
             </label>
 
@@ -138,9 +163,60 @@
 
     </div>
 
-    <div class="form-control">
+    <div class="form-control product-editor-full">
+
+        <label>Show Product In</label>
+
+        <div class="product-audience-options">
+
+            <label>
+                <input type="checkbox" name="productAudience" value="men">
+                Men
+            </label>
+
+            <label>
+                <input type="checkbox" name="productAudience" value="women">
+                Women
+            </label>
+
+            <label>
+                <input type="checkbox" name="productAudience" value="kids">
+                Kids
+            </label>
+
+        </div>
+
+    </div>
+
+    </section>
+
+    <section class="product-editor-card">
+
+        <div class="product-editor-section-header">
+
+            <div>
+
+                <h2>Product Images</h2>
+
+                <p>Upload one or more product photos. The first image becomes primary.</p>
+
+            </div>
+
+        </div>
+
+    <div class="form-control product-upload-control">
 
         <label>Product Images</label>
+
+        <label class="product-upload-box" for="productImages">
+
+            <i class="fas fa-cloud-arrow-up"></i>
+
+            <span>Choose product images</span>
+
+            <small>PNG, JPG, or WebP files</small>
+
+        </label>
 
         <input
 
@@ -163,15 +239,29 @@
 
     </div>
 
-    <br>
+    </section>
 
-    <button
-        class="btn btn-primary"
-        type="submit"
-    >
+    <div class="product-editor-actions">
 
-        Save Product
+        <button
+            class="btn btn-secondary"
+            type="button"
+            onclick="loadPage('products')"
+        >
 
-    </button>
+            Cancel
+
+        </button>
+
+        <button
+            class="btn btn-primary"
+            type="submit"
+        >
+
+            Save Product
+
+        </button>
+
+    </div>
 
 </form>

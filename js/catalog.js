@@ -126,6 +126,9 @@ function studioFormatPrice(value) {
 }
 
 function studioProductImage(product, variant = 0) {
+  if (variant && product.secondaryImageUrl) return product.secondaryImageUrl;
+  if (!variant && product.imageUrl) return product.imageUrl;
+
   const bg = variant ? product.accent : product.color;
   const garment = variant ? product.color : product.accent;
   const label = product.title.replace(/&/g, "and");

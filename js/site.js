@@ -1,5 +1,7 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await hydrateStorefrontProductsFromSupabase();
   renderCatalogGrids();
+  document.dispatchEvent(new CustomEvent("studio:products-rendered"));
   hydrateExistingProductCards();
   hydrateProductDetailPage();
   initSearchShortcuts();
@@ -8,14 +10,83 @@ document.addEventListener("DOMContentLoaded", () => {
   initCustomerSignInButtons();
 });
 
+async function hydrateStorefrontProductsFromSupabase() {
+  if (!window.publicSupabaseClient) return;
+
+  const { data, error } = await window.publicSupabaseClient
+    .from("store_products")
+    .select(`
+      id,
+      name,
+      slug,
+      description,
+      price,
+      stock,
+      featured,
+      active,
+      audience,
+      is_new_arrival,
+      store_categories (
+        name,
+        slug
+      ),
+      store_product_images (
+        image_url,
+        is_primary
+      )
+    `)
+    .eq("active", true)
+    .order("created_at", { ascending: false });
+
+  if (error || !data?.length) {
+    if (error) console.warn("Storefront product sync unavailable:", error.message);
+    return;
+  }
+
+  const products = data.map(normalizeStorefrontProduct);
+
+  window.STUDIO_PRODUCTS = products;
+  window.studioFindProduct = id =>
+    products.find(product => String(product.id) === String(id) || product.slug === String(id)) || products[0];
+}
+
+function normalizeStorefrontProduct(product) {
+  const images = product.store_product_images || [];
+  const primaryImage = images.find(image => image.is_primary) || images[0];
+  const secondaryImage = images.find(image => !image.is_primary) || images[1] || primaryImage;
+  const category = product.store_categories?.slug || product.store_categories?.name?.toLowerCase() || "uncategorized";
+
+  return {
+    id: product.id,
+    slug: product.slug,
+    title: product.name,
+    price: Number(product.price || 0),
+    category,
+    audience: Array.isArray(product.audience) ? product.audience : [],
+    tag: product.is_new_arrival ? "New Drop" : product.featured ? "Featured" : "",
+    kicker: product.is_new_arrival ? "New Arrival" : product.featured ? "Featured Product" : product.store_categories?.name || "STUDIO_FIT",
+    description: product.description || "A curated STUDIO_FIT piece selected for everyday wear.",
+    care: "Follow the care label inside the garment. Wash gently and dry flat where possible.",
+    sustainability: "Selected for long-term wear and responsible wardrobe building.",
+    imageUrl: primaryImage?.image_url || "",
+    secondaryImageUrl: secondaryImage?.image_url || primaryImage?.image_url || "",
+    color: "#6c706c",
+    accent: "#d8c6ad"
+  };
+}
+
 function renderCatalogGrids() {
   document.querySelectorAll("[data-catalog-grid]").forEach(grid => {
     const audience = grid.dataset.catalogGrid;
     const limit = Number(grid.dataset.limit || 0);
     let products = window.STUDIO_PRODUCTS || [];
 
-    if (audience && audience !== "all") {
-      products = products.filter(product => product.audience.includes(audience));
+    if (audience === "new") {
+      products = products.filter(product => product.tag === "New Drop");
+    } else if (audience === "featured") {
+      products = products.filter(product => product.tag === "Featured" || product.tag === "New Drop");
+    } else if (audience && audience !== "all") {
+      products = products.filter(product => product.audience?.includes(audience));
     }
 
     if (limit > 0) {
@@ -146,7 +217,9 @@ function initInlineAddToBagButtons() {
 
     const product = window.studioFindProduct(button.dataset.productId || button.dataset.id);
     if (typeof addItemToCart === "function") {
-      addItemToCart(product.id, product.title, product.price, window.studioProductImage(product));
+      const added = addItemToCart(product.id, product.title, product.price, window.studioProductImage(product));
+      if (!added) return;
+
       button.textContent = "Added";
       setTimeout(() => {
         button.textContent = "Add To Bag";
@@ -198,10 +271,31 @@ function initNewsletterForms() {
 
 function initCustomerSignInButtons() {
   document.querySelectorAll("#accountToggleBtn").forEach(button => {
+    const customer = getStoredCustomerForHeader();
+    button.onclick = null;
+    button.textContent = customer ? "Account" : "Sign In";
+    button.setAttribute(
+      "aria-label",
+      customer ? `Open account for ${customer.fullName || customer.email}` : "Sign in"
+    );
+
     button.addEventListener("click", () => {
-      window.location.href = "login.html";
+      window.location.href = customer ? "account.html" : "login.html";
     });
   });
+}
+
+function getStoredCustomerForHeader() {
+  if (window.STUDIO_CUSTOMER?.getCurrentCustomer) {
+    return window.STUDIO_CUSTOMER.getCurrentCustomer();
+  }
+
+  try {
+    const parsed = JSON.parse(localStorage.getItem("studioFitCustomer"));
+    return parsed && parsed.email ? parsed : null;
+  } catch (error) {
+    return null;
+  }
 }
 
 function showSiteToast(message, isError = false) {

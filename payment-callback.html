@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Status - STUDIO_FIT</title>
+  <meta name="description" content="Confirm your STUDIO_FIT payment status.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="checkout-minimal-header">
+    <div class="brand-logo"><a href="index.html">STUDIO_FIT</a></div>
+    <div class="secure-badge">Payment Verification</div>
+  </header>
+
+  <main class="product-detail-container payment-status-page">
+    <section class="checkout-form-section" style="background: transparent; padding: 0;">
+      <div class="panel-header-block">
+        <h2 id="paymentStatusTitle">Verifying payment</h2>
+        <p id="paymentStatusMessage">Please wait while we confirm your Paystack payment.</p>
+      </div>
+
+      <div class="payment-status-actions">
+        <button class="btn-save-profile" id="paymentPrimaryAction" type="button" disabled>
+          Checking Payment
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const title = document.getElementById("paymentStatusTitle");
+      const message = document.getElementById("paymentStatusMessage");
+      const action = document.getElementById("paymentPrimaryAction");
+      const reference = new URLSearchParams(window.location.search).get("reference");
+
+      if (!reference) {
+        title.textContent = "Payment reference missing";
+        message.textContent = "We could not find a Paystack reference for this payment.";
+        action.disabled = false;
+        action.textContent = "Return To Checkout";
+        action.onclick = () => window.location.href = "checkout.html";
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/paystack/verify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ reference })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "Payment verification failed.");
+        }
+
+        if (result.paid) {
+          title.textContent = "Payment successful";
+          message.textContent = "Your order has been marked as paid in admin.";
+          action.textContent = "Continue Shopping";
+          action.disabled = false;
+          action.onclick = () => window.location.href = "collection.html";
+          localStorage.removeItem(getCurrentCartKey());
+          return;
+        }
+
+        title.textContent = "Payment not completed";
+        message.textContent = result.message || "Paystack did not mark this payment as successful.";
+        action.textContent = "Return To Checkout";
+        action.disabled = false;
+        action.onclick = () => window.location.href = "checkout.html";
+      } catch (error) {
+        title.textContent = "Payment verification failed";
+        message.textContent = error.message;
+        action.textContent = "Return To Checkout";
+        action.disabled = false;
+        action.onclick = () => window.location.href = "checkout.html";
+      }
+    });
+
+    function getCurrentCartKey() {
+      try {
+        const customer = JSON.parse(localStorage.getItem("studioFitCustomer"));
+        if (customer?.email) {
+          return `studioFitCart:${String(customer.email).trim().toLowerCase()}`;
+        }
+      } catch (error) {
+        return "studioFitCart:guest";
+      }
+
+      return "studioFitCart:guest";
+    }
+  </script>
+</body>
+</html>

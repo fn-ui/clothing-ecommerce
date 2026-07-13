@@ -30,23 +30,23 @@
         <div class="form-block">
           <h3>Contact Information</h3>
           <div class="input-row">
-            <input type="email" placeholder="Email address" required autocomplete="email">
+            <input type="email" id="checkoutEmail" placeholder="Email address" required autocomplete="email">
           </div>
         </div>
 
         <div class="form-block">
           <h3>Shipping Address</h3>
           <div class="input-grid-2">
-            <input type="text" placeholder="First name" required autocomplete="given-name">
-            <input type="text" placeholder="Last name" required autocomplete="family-name">
+            <input type="text" id="checkoutFirstName" placeholder="First name" required autocomplete="given-name">
+            <input type="text" id="checkoutLastName" placeholder="Last name" required autocomplete="family-name">
           </div>
           <div class="input-row">
-            <input type="text" placeholder="Address" required autocomplete="shipping street-address">
+            <input type="text" id="checkoutAddress" placeholder="Address" required autocomplete="shipping street-address">
           </div>
           <div class="input-grid-3">
-            <input type="text" placeholder="City" required autocomplete="shipping address-level2">
-            <input type="text" placeholder="Postal code" required autocomplete="shipping postal-code">
-            <input type="text" placeholder="Country" required autocomplete="shipping country-name">
+            <input type="text" id="checkoutCity" placeholder="City" required autocomplete="shipping address-level2">
+            <input type="text" id="checkoutPostalCode" placeholder="Postal code" required autocomplete="shipping postal-code">
+            <input type="text" id="checkoutCountry" placeholder="Country" required autocomplete="shipping country-name">
           </div>
         </div>
 
@@ -128,8 +128,11 @@
   </main>
 
   <!-- Load Global Cart Engine Script First -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-public.js"></script>
   <script src="js/catalog.js"></script>
   <script src="js/cart.js"></script>
+  <script src="js/customer-auth.js"></script>
 
   <!-- Checkout Computation Management Script -->
   <script>
@@ -154,6 +157,19 @@
       (typeof getCartItems === 'function')
         ? getCartItems()
         : [];
+
+    const signedInCustomer =
+      window.STUDIO_CUSTOMER?.getCurrentCustomer?.() || null;
+
+    if (signedInCustomer) {
+      const emailInput = document.getElementById('checkoutEmail');
+      const firstNameInput = document.getElementById('checkoutFirstName');
+      const lastNameInput = document.getElementById('checkoutLastName');
+
+      if (emailInput && !emailInput.value) emailInput.value = signedInCustomer.email || '';
+      if (firstNameInput && !firstNameInput.value) firstNameInput.value = signedInCustomer.firstName || '';
+      if (lastNameInput && !lastNameInput.value) lastNameInput.value = signedInCustomer.lastName || '';
+    }
 
     const runningSubtotal =
       cartItems.reduce((sum, item) => {
@@ -210,7 +226,7 @@
     // ===============================
     // PAYMENT HANDOFF
     // ===============================
-    checkoutForm.addEventListener('submit', (e) => {
+    checkoutForm.addEventListener('submit', async (e) => {
 
       e.preventDefault();
 
@@ -218,10 +234,106 @@
         document.querySelector('input[name="paymentMethod"]:checked')?.value || 'mpesa';
       const selectedLabel = methodLabels[selectedMethod];
 
+      const customer =
+        window.STUDIO_CUSTOMER?.getCurrentCustomer?.() || null;
+
+      const checkoutIntent = {
+        id: crypto.randomUUID(),
+        customer_email: document.getElementById('checkoutEmail')?.value.trim().toLowerCase(),
+        customer_id: customer?.id || null,
+        customer_name: [
+          document.getElementById('checkoutFirstName')?.value.trim(),
+          document.getElementById('checkoutLastName')?.value.trim()
+        ].filter(Boolean).join(' '),
+        payment_method: selectedMethod,
+        status: 'pending',
+        payment_status: 'pending',
+        subtotal: runningSubtotal,
+        total: runningSubtotal,
+        currency: 'KES',
+        items: cartItems,
+        shipping_address: {
+          line1: document.getElementById('checkoutAddress')?.value.trim(),
+          city: document.getElementById('checkoutCity')?.value.trim(),
+          postal_code: document.getElementById('checkoutPostalCode')?.value.trim(),
+          country: document.getElementById('checkoutCountry')?.value.trim()
+        }
+      };
+
+      if (customer?.email && window.STUDIO_CUSTOMER?.syncCustomerToAdmin) {
+        await window.STUDIO_CUSTOMER.syncCustomerToAdmin({
+          ...customer,
+          email: checkoutIntent.customer_email || customer.email,
+          fullName: checkoutIntent.customer_name || customer.fullName,
+          address: {
+            label: 'Checkout Address',
+            line1: checkoutIntent.shipping_address.line1,
+            city: checkoutIntent.shipping_address.city,
+            postalCode: checkoutIntent.shipping_address.postal_code,
+            country: checkoutIntent.shipping_address.country
+          }
+        });
+      }
+
+      let checkoutCaptured = false;
+      let checkoutCaptureMessage = 'Supabase public client did not load.';
+
+      if (window.publicSupabaseClient) {
+        const { error: checkoutCaptureError } = await window.publicSupabaseClient
+          .from('store_checkout_intents')
+          .insert(checkoutIntent);
+
+        checkoutCaptured = !checkoutCaptureError;
+        checkoutCaptureMessage = checkoutCaptureError?.message || '';
+
+        if (checkoutCaptureError) {
+          console.error('Checkout capture failed:', checkoutCaptureError);
+        }
+      }
+
       toast.textContent =
-        `${selectedLabel} selected. Connect the ${selectedLabel} gateway to collect payment.`;
+        checkoutCaptured
+          ? `${selectedLabel} selected. Checkout details sent to admin.`
+          : `${selectedLabel} selected. Checkout capture failed: ${checkoutCaptureMessage}`;
 
       toast.classList.add('show');
+
+      if (checkoutCaptured && selectedMethod === 'paystack') {
+        try {
+          toast.textContent = 'Redirecting to Paystack...';
+
+          const paymentResponse = await fetch('/api/paystack/initialize', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              checkoutId: checkoutIntent.id,
+              email: checkoutIntent.customer_email,
+              customerName: checkoutIntent.customer_name,
+              amount: checkoutIntent.total,
+              currency: checkoutIntent.currency
+            })
+          });
+
+          const paymentResult = await paymentResponse.json();
+
+          if (!paymentResponse.ok) {
+            throw new Error(paymentResult.error || 'Paystack initialization failed.');
+          }
+
+          window.location.href = paymentResult.authorization_url;
+          return;
+        } catch (error) {
+          console.error('Paystack initialization failed:', error);
+          toast.textContent = `Paystack setup failed: ${error.message}`;
+        }
+      }
+
+      if (checkoutCaptured && selectedMethod !== 'paystack') {
+        toast.textContent =
+          `${selectedLabel} selected. Order captured in admin. Gateway integration is not connected yet.`;
+      }
 
       setTimeout(() => {
 

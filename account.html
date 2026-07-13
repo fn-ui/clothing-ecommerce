@@ -14,178 +14,128 @@
 </head>
 <body>
 
-  <!-- Reusable Boutique Header Bar -->
   <header class="boutique-header">
     <div class="brand-logo"><a href="index.html" style="text-decoration:none; color:#000;">STUDIO_FIT</a></div>
     <nav class="navigation-links">
       <a href="collection.html">New Arrivals</a>
       <a href="men.html">Men</a>
-     <a href="women.html">Women</a>
-     <a href="kids.html">Kids</a>
+      <a href="women.html">Women</a>
+      <a href="kids.html">Kids</a>
       <a href="lookbook.html">Lookbook</a>
     </nav>
     <div class="utility-actions">
       <div class="search-wrapper">
         <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off">
       </div>
-      <button id="accountToggleBtn" class="account-portal-link">Sign In</button>
+      <button id="accountToggleBtn" class="account-portal-link">Account</button>
       <span class="cart-status" id="openCartBtn">Bag (0)</span>
     </div>
   </header>
 
-  <!-- User Account Portal Framework Grid Workspace -->
   <main class="account-portal-container">
-    
-    <!-- Left Navigation Anchor Menu Column -->
     <aside class="account-sidebar-navigation">
       <div class="user-welcome-badge">
-        <span class="user-avatar-initials">JD</span>
+        <span class="user-avatar-initials" id="customerAvatar">C</span>
         <div class="user-meta-strings">
-          <h4>Jane Doe</h4>
-          <span>Member since 2026</span>
+          <h4 id="customerName">Customer</h4>
+          <span id="customerMemberSince">Member since 2026</span>
         </div>
       </div>
       <nav class="sidebar-tab-menu">
         <button class="sidebar-tab-btn active" data-target="ordersSection">Order History</button>
         <button class="sidebar-tab-btn" data-target="addressesSection">Shipping Addresses</button>
         <button class="sidebar-tab-btn" data-target="profileSection">Profile Details</button>
-        <button class="sidebar-tab-logout-btn" onclick="alert('Logging out...');">Sign Out</button>
+        <button class="sidebar-tab-logout-btn" id="customerSignOutBtn" type="button">Sign Out</button>
       </nav>
     </aside>
 
-    <!-- Right Workspace Area: Interactive Content Switcher Panels -->
     <section class="account-content-display">
-      
-      <!-- SUBSECTION PANEL 1: Order History (Active Default) -->
       <div class="account-view-panel is-visible" id="ordersSection">
         <div class="panel-header-block">
           <h2>Order History</h2>
-          <p>Track fulfillment metrics, returns, and historical invoice entries.</p>
+          <p>Review completed orders and continue checkout from your current bag.</p>
         </div>
 
-        <div class="orders-history-list-stack">
-          <!-- Order Card Item 1 -->
-          <div class="order-history-row-card">
-            <div class="order-card-meta-top">
-              <div class="meta-data-group">
-                <span class="meta-label">Order Reference</span>
-                <span class="meta-value">#SF-2026-8941</span>
-              </div>
-              <div class="meta-data-group">
-                <span class="meta-label">Date Placed</span>
-                <span class="meta-value">July 06, 2026</span>
-              </div>
-              <div class="meta-data-group">
-                <span class="meta-label">Total Invoice Due</span>
-                <span class="meta-value">$183.00</span>
-              </div>
-              <span class="fulfillment-status-badge tag-transit">In Transit</span>
-            </div>
-            <div class="order-card-items-preview">
-              <div class="preview-item-thumbnail">
-                <img src="assets/hero-studio.svg" alt="Item Preview">
-                <div class="thumbnail-count-bubble">1</div>
-              </div>
-              <div class="preview-item-info-strings">
-                <h5>Oversized Knit Vest</h5>
-                <span>Size: Medium / Carbon Grey</span>
-              </div>
-              <button class="btn-outline-action" onclick="alert('Opening tracking link...');">Track Consignment</button>
-            </div>
+        <div class="account-summary-grid">
+          <div class="account-summary-card">
+            <span>Items In Bag</span>
+            <strong id="accountBagCount">0</strong>
           </div>
-
-          <!-- Order Card Item 2 -->
-          <div class="order-history-row-card">
-            <div class="order-card-meta-top">
-              <div class="meta-data-group">
-                <span class="meta-label">Order Reference</span>
-                <span class="meta-value">#SF-2026-4412</span>
-              </div>
-              <div class="meta-data-group">
-                <span class="meta-label">Date Placed</span>
-                <span class="meta-value">April 12, 2026</span>
-              </div>
-              <div class="meta-data-group">
-                <span class="meta-label">Total Invoice Due</span>
-                <span class="meta-value">$95.00</span>
-              </div>
-              <span class="fulfillment-status-badge tag-delivered">Delivered</span>
-            </div>
-            <div class="order-card-items-preview">
-              <div class="preview-item-thumbnail">
-                <img src="assets/hero-studio.svg" alt="Item Preview">
-                <div class="thumbnail-count-bubble">1</div>
-              </div>
-              <div class="preview-item-info-strings">
-                <h5>Classic Heavy Hoodie</h5>
-                <span>Size: Medium / Jet Black</span>
-              </div>
-              <button class="btn-outline-action" onclick="alert('Downloading invoice PDF...');">Invoice PDF</button>
-            </div>
+          <div class="account-summary-card">
+            <span>Current Bag Total</span>
+            <strong id="accountBagTotal">$0.00</strong>
           </div>
         </div>
+
+        <div class="orders-history-list-stack" id="ordersList"></div>
       </div>
 
-      <!-- SUBSECTION PANEL 2: Shipping Addresses (Hidden Default) -->
       <div class="account-view-panel" id="addressesSection">
         <div class="panel-header-block">
           <h2>Shipping Addresses</h2>
-          <p>Manage default destinations and contact tags for faster checkouts.</p>
+          <p>Manage your default destination for faster checkouts.</p>
         </div>
 
-        <div class="address-cards-flex-grid">
-          <!-- Address 1 (Primary) -->
-          <div class="address-record-card is-default-billing">
-            <div class="address-card-header-row">
-              <h5>Primary Residence</h5>
-              <span class="default-pill-tag">Default</span>
-            </div>
-            <p class="address-body-text">
-              Jane Doe<br>
-              452 Editorial Boulevard, Suite 10B<br>
-              New York, NY 10013<br>
-              United States
-            </p>
-            <div class="address-card-actions-row">
-              <button class="address-action-link">Modify Details</button>
-              <button class="address-action-link text-danger">Remove</button>
-            </div>
-          </div>
+        <div class="address-cards-flex-grid" id="addressList"></div>
 
-          <!-- Add New Address Slot Card -->
-          <div class="add-new-address-placeholder-card" onclick="alert('Opening address form...');">
-            <span class="plus-icon-symbol">+</span>
-            <span>Add New Destination</span>
+        <form class="profile-update-form-block" id="customerAddressForm">
+          <div class="form-input-row-grid">
+            <div class="input-field-wrapper">
+              <label>Address Label</label>
+              <input type="text" id="addressLabel" placeholder="Home, office, or campus" autocomplete="address-line1">
+            </div>
+            <div class="input-field-wrapper">
+              <label>Country</label>
+              <input type="text" id="addressCountry" placeholder="Country" autocomplete="shipping country-name" required>
+            </div>
           </div>
-        </div>
+          <div class="input-field-wrapper">
+            <label>Street Address</label>
+            <input type="text" id="addressLine1" placeholder="Street address" autocomplete="shipping street-address" required>
+          </div>
+          <div class="form-input-row-grid">
+            <div class="input-field-wrapper">
+              <label>City</label>
+              <input type="text" id="addressCity" placeholder="City" autocomplete="shipping address-level2" required>
+            </div>
+            <div class="input-field-wrapper">
+              <label>Postal Code</label>
+              <input type="text" id="addressPostalCode" placeholder="Postal code" autocomplete="shipping postal-code">
+            </div>
+          </div>
+          <button type="submit" class="btn-save-profile">Save Address</button>
+        </form>
       </div>
 
-      <!-- SUBSECTION PANEL 3: Profile Details (Hidden Default) -->
       <div class="account-view-panel" id="profileSection">
         <div class="panel-header-block">
           <h2>Profile Details</h2>
-          <p>Update authentication credentials, names, and parameters.</p>
+          <p>Keep your customer information up to date.</p>
         </div>
 
-        <form class="profile-update-form-block" onsubmit="event.preventDefault(); alert('Profile Saved!');">
+        <form class="profile-update-form-block" id="customerProfileForm">
           <div class="form-input-row-grid">
             <div class="input-field-wrapper">
               <label>First Name</label>
-              <input type="text" value="Jane" required autocomplete="given-name">
+              <input type="text" id="profileFirstName" required autocomplete="given-name">
             </div>
             <div class="input-field-wrapper">
               <label>Last Name</label>
-              <input type="text" value="Doe" required autocomplete="family-name">
+              <input type="text" id="profileLastName" autocomplete="family-name">
             </div>
           </div>
           <div class="input-field-wrapper">
             <label>Email Address</label>
-            <input type="email" value="jane.doe@studiofit.com" required autocomplete="email">
+            <input type="email" id="profileEmail" required autocomplete="email">
+          </div>
+          <div class="input-field-wrapper">
+            <label>Phone Number</label>
+            <input type="tel" id="profilePhone" placeholder="Optional" autocomplete="tel">
           </div>
           <div class="form-input-row-grid" style="margin-top: 20px; border-top: 1px solid #e5e5ea; padding-top: 32px;">
             <div class="input-field-wrapper">
               <label>Current Account Password</label>
-              <input type="password" placeholder="••••••••" autocomplete="current-password">
+              <input type="password" placeholder="Current password" autocomplete="current-password">
             </div>
             <div class="input-field-wrapper">
               <label>New Account Password</label>
@@ -195,11 +145,9 @@
           <button type="submit" class="btn-save-profile">Save Profile Changes</button>
         </form>
       </div>
-
     </section>
   </main>
 
-  <!-- Modern Slide-Out Cart Drawer Panel -->
   <div class="cart-drawer-overlay" id="cartDrawerOverlay">
     <div class="cart-drawer-panel">
       <div class="drawer-header">
@@ -221,88 +169,12 @@
     </div>
   </div>
 
-  <!-- Load Global Cart Engine -->
-<script src="js/catalog.js"></script>
-<script src="js/cart.js"></script>
-<script src="js/site.js"></script>
-
-<!-- Interactive Account Logic -->
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-
-    // =========================
-    // ACCOUNT TABS
-    // =========================
-    const tabButtons = document.querySelectorAll(".sidebar-tab-btn");
-    const viewPanels = document.querySelectorAll(".account-view-panel");
-
-    tabButtons.forEach(button => {
-
-      button.addEventListener("click", () => {
-
-        const targetSectionId = button.getAttribute("data-target");
-
-        // Remove active states
-        tabButtons.forEach(btn => btn.classList.remove("active"));
-        viewPanels.forEach(panel => panel.classList.remove("is-visible"));
-
-        // Activate selected tab
-        button.classList.add("active");
-
-        const targetPanel = document.getElementById(targetSectionId);
-
-        if (targetPanel) {
-          targetPanel.classList.add("is-visible");
-        }
-
-      });
-
-    });
-
-    // =========================
-    // CART DRAWER
-    // =========================
-    const openCartBtn = document.getElementById("openCartBtn");
-    const closeCartBtn = document.getElementById("closeCartBtn");
-    const cartDrawerOverlay = document.getElementById("cartDrawerOverlay");
-
-    // Open cart
-    if (openCartBtn) {
-      openCartBtn.addEventListener("click", () => {
-        cartDrawerOverlay.classList.add("is-active");
-      });
-    }
-
-    // Close cart
-    if (closeCartBtn) {
-      closeCartBtn.addEventListener("click", () => {
-        cartDrawerOverlay.classList.remove("is-active");
-      });
-    }
-
-    // Close cart when clicking outside
-    if (cartDrawerOverlay) {
-      cartDrawerOverlay.addEventListener("click", (e) => {
-        if (e.target === cartDrawerOverlay) {
-          cartDrawerOverlay.classList.remove("is-active");
-        }
-      });
-    }
-
-    // =========================
-    // SIGN OUT
-    // =========================
-    const signOutBtn = document.querySelector(".sidebar-tab-logout-btn");
-
-    if (signOutBtn) {
-      signOutBtn.addEventListener("click", () => {
-
-        alert("Signed out successfully!");
-
-        // Redirect back home
-        window.location.href = "index.html";
-      });
-    }
-
-  });
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-public.js"></script>
+  <script src="js/catalog.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/customer-auth.js"></script>
+  <script src="js/site.js"></script>
+  <div id="toastNotification" class="toast-notification"></div>
+</body>
+</html>

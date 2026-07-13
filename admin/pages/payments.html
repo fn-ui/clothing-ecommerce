@@ -1,0 +1,63 @@
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Orders / Payments</h1>
+        <p class="page-subtitle">Review checkout leads and selected payment methods from the public site.</p>
+    </div>
+
+    <button class="btn btn-secondary" id="exportPaymentsBtn">
+        <i class="fas fa-download"></i>
+        Export CSV
+    </button>
+</div>
+
+<section class="cards payments-overview">
+    <div class="card">
+        <h4>Checkout Leads</h4>
+        <h2 id="paymentLeadCount">0</h2>
+        <span>Submitted checkout forms</span>
+    </div>
+
+    <div class="card">
+        <h4>Pending</h4>
+        <h2 id="pendingPaymentCount">0</h2>
+        <span>Waiting for gateway connection</span>
+    </div>
+
+    <div class="card">
+        <h4>Total Value</h4>
+        <h2 id="paymentTotalValue">$0.00</h2>
+        <span>Captured checkout value</span>
+    </div>
+</section>
+
+<div class="admin-panel admin-list-panel">
+    <div class="table-toolbar">
+        <div>
+            <h2 class="section-title">Payment & Order Leads</h2>
+            <p class="admin-panel-subtitle">These are checkout intents, not completed paid orders until a real gateway is connected.</p>
+        </div>
+
+        <input
+            type="search"
+            id="paymentSearch"
+            class="search-input"
+            placeholder="Search orders or customers..."
+        >
+    </div>
+
+    <div class="admin-table-scroll">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Items</th>
+                    <th>Captured</th>
+                </tr>
+            </thead>
+            <tbody id="paymentsTable"></tbody>
+        </table>
+    </div>
+</div>

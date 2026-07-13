@@ -2,13 +2,28 @@
 // STUDIO_FIT CART SYSTEM
 // ===============================
 
+function getCartStorageKey() {
+  try {
+    const customer = JSON.parse(localStorage.getItem('studioFitCustomer'));
+    if (customer?.email) {
+      return `studioFitCart:${String(customer.email).trim().toLowerCase()}`;
+    }
+  } catch (error) {
+    localStorage.removeItem('studioFitCustomer');
+  }
+
+  return 'studioFitCart:guest';
+}
+
 // Get cart from localStorage
 function getCartItems() {
+  const cartKey = getCartStorageKey();
+
   try {
-    const parsed = JSON.parse(localStorage.getItem('studioFitCart')) || [];
+    const parsed = JSON.parse(localStorage.getItem(cartKey)) || [];
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
-    localStorage.removeItem('studioFitCart');
+    localStorage.removeItem(cartKey);
     return [];
   }
 }
@@ -25,7 +40,7 @@ function escapeCartText(value) {
 
 // Save cart + refresh UI
 function saveCartItems(cartArray) {
-  localStorage.setItem('studioFitCart', JSON.stringify(cartArray));
+  localStorage.setItem(getCartStorageKey(), JSON.stringify(cartArray));
   syncCartUI();
 }
 
@@ -42,6 +57,10 @@ function getCartQuantity() {
 // ADD TO CART
 // ===============================
 function addItemToCart(id, title, price, img) {
+  if (!isCustomerSignedInForCart()) {
+    promptSignInForCart();
+    return false;
+  }
 
   const cartItems = getCartItems();
 
@@ -78,6 +97,32 @@ if (toast) {
     toast.classList.remove('show');
   }, 2200);
 }
+
+return true;
+}
+
+function isCustomerSignedInForCart() {
+  try {
+    const customer = JSON.parse(localStorage.getItem('studioFitCustomer'));
+    return Boolean(customer?.email);
+  } catch (error) {
+    localStorage.removeItem('studioFitCustomer');
+    return false;
+  }
+}
+
+function promptSignInForCart() {
+  const toast = document.getElementById('toastNotification');
+
+  if (toast) {
+    toast.textContent = 'Please sign in before adding items to your bag.';
+    toast.classList.add('show');
+  }
+
+  setTimeout(() => {
+    if (toast) toast.classList.remove('show');
+    window.location.href = `login.html?redirect=${encodeURIComponent(window.location.pathname.split('/').pop() || 'index.html')}`;
+  }, 900);
 }
 // ===============================
 // UPDATE UI
@@ -271,7 +316,7 @@ function initCartDrawerInteractions() {
 
     clearCartBtn.addEventListener('click', () => {
 
-      localStorage.removeItem('studioFitCart');
+      localStorage.removeItem(getCartStorageKey());
 
       syncCartUI();
     });

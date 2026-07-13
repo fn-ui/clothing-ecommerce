@@ -1,0 +1,62 @@
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Customers</h1>
+        <p class="page-subtitle">View customers captured from public account, profile, and checkout activity.</p>
+    </div>
+
+    <button class="btn btn-secondary" id="exportCustomersBtn">
+        <i class="fas fa-download"></i>
+        Export CSV
+    </button>
+</div>
+
+<section class="cards customer-overview">
+    <div class="card">
+        <h4>Total Customers</h4>
+        <h2 id="totalCustomers">0</h2>
+        <span>Profiles and captured leads</span>
+    </div>
+
+    <div class="card">
+        <h4>Profiles</h4>
+        <h2 id="profileCustomers">0</h2>
+        <span>Saved in store_profiles</span>
+    </div>
+
+    <div class="card">
+        <h4>Leads</h4>
+        <h2 id="leadCustomers">0</h2>
+        <span>Fallback and checkout records</span>
+    </div>
+</section>
+
+<div class="admin-panel admin-list-panel">
+    <div class="table-toolbar">
+        <div>
+            <h2 class="section-title">Customer Records</h2>
+            <p class="admin-panel-subtitle">Names, emails, source, and latest capture date from profiles, leads, and checkout.</p>
+        </div>
+
+        <input
+            type="search"
+            id="customerSearch"
+            class="search-input"
+            placeholder="Search customers..."
+        >
+    </div>
+
+    <div class="admin-table-scroll">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Source</th>
+                    <th>Captured</th>
+                </tr>
+            </thead>
+            <tbody id="customersTable"></tbody>
+        </table>
+    </div>
+</div>

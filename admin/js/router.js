@@ -30,6 +30,14 @@ const routes = {
         file: "pages/newsletter.html",
         init: () => loadNewsletter()
     },
+    customers: {
+        file: "pages/customers.html",
+        init: () => loadCustomers()
+    },
+    payments: {
+        file: "pages/payments.html",
+        init: () => loadPayments()
+    },
     settings: {
         file: "pages/settings.html",
         init: () => loadSettings()

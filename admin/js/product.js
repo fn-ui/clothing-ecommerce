@@ -73,7 +73,7 @@ async function fetchProducts() {
 
                 <tr>
 
-                    <td colspan="8" style="text-align:center;padding:40px">
+                    <td colspan="9" style="text-align:center;padding:40px">
 
                         Failed to load products.
 
@@ -107,7 +107,7 @@ function renderProducts() {
 
             <tr>
 
-                <td colspan="8" style="text-align:center;padding:40px">
+                <td colspan="9" style="text-align:center;padding:40px">
 
                     No products found.
 
@@ -177,6 +177,12 @@ function renderProducts() {
                         ${product.featured ? "Featured" : "No"}
 
                     </span>
+
+                </td>
+
+                <td>
+
+                    ${productPlacementBadges(product)}
 
                 </td>
 
@@ -300,6 +306,7 @@ function initializeProductEvents() {
     }
 
     const addBtn = document.getElementById("addProductBtn");
+    const importBtn = document.getElementById("importCatalogBtn");
 
     if (addBtn) {
 
@@ -308,6 +315,214 @@ function initializeProductEvents() {
             loadPage("add-product");
 
         });
+
+    }
+
+    if (importBtn) {
+
+        importBtn.addEventListener("click", importPublicCatalogToAdmin);
+
+    }
+
+}
+
+function productPlacementBadges(product) {
+
+    const placements = [
+        ...(product.audience || []).map(value => value.charAt(0).toUpperCase() + value.slice(1)),
+        ...(product.is_new_arrival ? ["New"] : []),
+        ...(product.featured ? ["Featured"] : [])
+    ];
+
+    if (!placements.length) return `<span class="badge gray">None</span>`;
+
+    return placements
+        .map(label => `<span class="badge gray placement-badge">${label}</span>`)
+        .join(" ");
+
+}
+
+// ==========================================
+// IMPORT PUBLIC CATALOG
+// ==========================================
+
+async function importPublicCatalogToAdmin() {
+
+    const publicProducts = window.STUDIO_PRODUCTS || [];
+
+    if (!publicProducts.length) {
+
+        Utils.toast("Public catalog data was not found.", "error");
+
+        return;
+
+    }
+
+    const confirmed = await Utils.confirm(
+        "Import the public demo catalog into admin products?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+
+        Utils.showLoader("Importing public catalog...");
+
+        const categoriesBySlug = await ensureImportCategories(publicProducts);
+
+        let imported = 0;
+
+        for (const publicProduct of publicProducts) {
+
+            const slug = Utils.slug(publicProduct.title);
+
+            const { data: existing } = await window.supabaseClient
+                .from("store_products")
+                .select("id")
+                .eq("slug", slug)
+                .maybeSingle();
+
+            if (existing) continue;
+
+            const { data: insertedProduct, error: productError } = await window.supabaseClient
+                .from("store_products")
+                .insert({
+                    category_id: categoriesBySlug[publicProduct.category],
+                    name: publicProduct.title,
+                    slug,
+                    description: publicProduct.description || "",
+                    price: Number(publicProduct.price || 0),
+                    stock: 20,
+                    audience: publicProduct.audience || [],
+                    is_new_arrival: publicProduct.tag === "New Drop",
+                    featured: publicProduct.tag === "New Drop",
+                    active: true
+                })
+                .select()
+                .single();
+
+            if (productError) throw productError;
+
+            await insertImportedProductImages(insertedProduct.id, publicProduct);
+
+            imported += 1;
+
+        }
+
+        Utils.toast(
+            imported
+                ? `${imported} public products imported.`
+                : "Public catalog is already imported."
+        );
+
+        await loadProducts();
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        Utils.toast(importCatalogErrorMessage(err), "error");
+
+    }
+
+    finally {
+
+        Utils.hideLoader();
+
+    }
+
+}
+
+function importCatalogErrorMessage(error) {
+
+    if (error?.code === "42501") {
+
+        const table = error.message?.match(/table "([^"]+)"/)?.[1] || "a Supabase table";
+
+        return `Supabase policy blocked import on ${table}. Add the admin product-management RLS policies from SETUP_STEPS.md.`;
+
+    }
+
+    if (error?.code === "PGRST204" || /audience|is_new_arrival/i.test(error?.message || "")) {
+
+        return "Product placement columns are missing. Run the audience/is_new_arrival SQL from SETUP_STEPS.md.";
+
+    }
+
+    return error?.message || "Catalog import failed.";
+
+}
+
+async function ensureImportCategories(publicProducts) {
+
+    const uniqueCategorySlugs = [
+        ...new Set(publicProducts.map(product => product.category).filter(Boolean))
+    ];
+
+    const categoriesBySlug = {};
+
+    for (const slug of uniqueCategorySlugs) {
+
+        const displayName = slug
+            .split("-")
+            .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(" ");
+
+        const { data: existing } = await window.supabaseClient
+            .from("store_categories")
+            .select("id")
+            .eq("slug", slug)
+            .maybeSingle();
+
+        if (existing) {
+
+            categoriesBySlug[slug] = existing.id;
+
+            continue;
+
+        }
+
+        const { data: insertedCategory, error } = await window.supabaseClient
+            .from("store_categories")
+            .insert({
+                name: displayName,
+                slug
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        categoriesBySlug[slug] = insertedCategory.id;
+
+    }
+
+    return categoriesBySlug;
+
+}
+
+async function insertImportedProductImages(productId, publicProduct) {
+
+    if (typeof window.studioProductImage !== "function") return;
+
+    const images = [
+        window.studioProductImage(publicProduct, 0),
+        window.studioProductImage(publicProduct, 1)
+    ];
+
+    for (let index = 0; index < images.length; index++) {
+
+        const { error } = await window.supabaseClient
+            .from("store_product_images")
+            .insert({
+                product_id: productId,
+                image_url: images[index],
+                is_primary: index === 0
+            });
+
+        if (error) throw error;
 
     }
 
@@ -553,6 +768,44 @@ function setupProductForm(){
     form.addEventListener("submit",saveProduct);
 
 }
+
+function getSelectedProductAudience() {
+
+    return Array.from(document.querySelectorAll('input[name="productAudience"]:checked'))
+        .map(input => input.value);
+
+}
+
+function setSelectedProductAudience(audience = []) {
+
+    const selected = new Set(audience);
+
+    document.querySelectorAll('input[name="productAudience"]').forEach(input => {
+
+        input.checked = selected.has(input.value);
+
+    });
+
+}
+
+function productSaveErrorMessage(error) {
+
+    if (error?.code === "PGRST204" || /audience|is_new_arrival/i.test(error?.message || "")) {
+
+        return "Product placement columns are missing. Run the audience/is_new_arrival SQL from SETUP_STEPS.md.";
+
+    }
+
+    if (error?.code === "42501") {
+
+        return "Supabase policy blocked product save. Add the admin product-management RLS policies from SETUP_STEPS.md.";
+
+    }
+
+    return error?.message || "Product save failed.";
+
+}
+
 // ==========================================
 // SAVE PRODUCT
 // ==========================================
@@ -581,6 +834,10 @@ async function saveProduct(e) {
             price: Number(document.getElementById("productPrice").value),
 
             stock: Number(document.getElementById("productStock").value),
+
+            audience: getSelectedProductAudience(),
+
+            is_new_arrival: document.getElementById("newArrival").checked,
 
             featured: document.getElementById("featured").checked,
 
@@ -630,7 +887,7 @@ async function saveProduct(e) {
 
         console.error(err);
 
-        Utils.toast(err.message, "error");
+        Utils.toast(productSaveErrorMessage(err), "error");
 
     }
 
@@ -799,7 +1056,11 @@ async function populateProduct(){
 
     document.getElementById("featured").checked=data.featured;
 
+    document.getElementById("newArrival").checked=Boolean(data.is_new_arrival);
+
     document.getElementById("active").checked=data.active;
+
+    setSelectedProductAudience(data.audience || []);
 
     renderExistingImages(data.store_product_images || []);
 

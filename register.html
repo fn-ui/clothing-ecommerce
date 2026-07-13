@@ -27,29 +27,30 @@
         <p>Get early access to seasonal drops, lookbooks, and design releases.</p>
       </div>
 
-      <form class="profile-update-form-block" style="max-width: 560px;" onsubmit="event.preventDefault(); alert('Account Created Successfully!'); window.location.href='account.html';">
+      <form class="profile-update-form-block" id="customerRegisterForm" style="max-width: 560px;">
         <div class="form-input-row-grid">
           <div class="input-field-wrapper">
             <label>First Name</label>
-            <input type="text" placeholder="First name" required autocomplete="given-name">
+            <input type="text" id="registerFirstName" placeholder="First name" required autocomplete="given-name">
           </div>
           <div class="input-field-wrapper">
             <label>Last Name</label>
-            <input type="text" placeholder="Last name" required autocomplete="family-name">
+            <input type="text" id="registerLastName" placeholder="Last name" required autocomplete="family-name">
           </div>
         </div>
 
         <div class="input-field-wrapper">
           <label>Email Address</label>
-          <input type="email" placeholder="Email address" required autocomplete="email">
+          <input type="email" id="registerEmail" placeholder="Email address" required autocomplete="email">
         </div>
 
         <div class="input-field-wrapper">
           <label>Password (Min. 8 characters)</label>
-          <input type="password" placeholder="Password" required minlength="8" autocomplete="new-password">
+          <input type="password" id="registerPassword" placeholder="Password" required minlength="8" autocomplete="new-password">
         </div>
 
         <button type="submit" class="btn-save-profile">Create Account</button>
+        <p class="form-message" id="customerAuthMessage" aria-live="polite"></p>
 
         <div style="margin-top: 14px; font-size: 0.9rem; color: #767677;">
           Already have an account?
@@ -94,8 +95,11 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-public.js"></script>
   <script src="js/catalog.js"></script>
   <script src="js/cart.js"></script>
+  <script src="js/customer-auth.js"></script>
   <script src="js/site.js"></script>
 </body>
 </html>
