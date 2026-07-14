@@ -7,13 +7,8 @@ const rootDir = __dirname;
 const port = Number(process.env.PORT || 3000);
 
 const apiRoutes = {
-  "/api/paypal-create-order": "./api/paypal-create-order",
-  "/api/paypal-capture-order": "./api/paypal-capture-order",
   "/api/paypal/create-order": "./api/paypal/create-order",
   "/api/paypal/capture-order": "./api/paypal/capture-order",
-  "/api/mpesa-stk-push": "./api/mpesa-stk-push",
-  "/api/mpesa-callback": "./api/mpesa-callback",
-  "/api/mpesa-query": "./api/mpesa-query",
   "/api/mpesa/stk-push": "./api/mpesa/stk-push",
   "/api/mpesa/callback": "./api/mpesa/callback",
   "/api/mpesa/query": "./api/mpesa/query",

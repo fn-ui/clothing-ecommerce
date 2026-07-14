@@ -246,7 +246,7 @@
       for (let attempt = 1; attempt <= 12; attempt += 1) {
         await new Promise(resolve => setTimeout(resolve, 5000));
 
-        const response = await fetch('/api/mpesa-query', {
+        const response = await fetch('/api/mpesa/query', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -422,7 +422,7 @@
         try {
           toast.textContent = 'Sending M-Pesa prompt...';
 
-          const paymentResponse = await fetch('/api/mpesa-stk-push', {
+          const paymentResponse = await fetch('/api/mpesa/stk-push', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -456,7 +456,7 @@
         try {
           toast.textContent = 'Redirecting to PayPal...';
 
-          const paymentResponse = await fetch('/api/paypal-create-order', {
+          const paymentResponse = await fetch('/api/paypal/create-order', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

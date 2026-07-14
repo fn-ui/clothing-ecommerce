@@ -21,7 +21,7 @@ module.exports = async function handler(req, res) {
 
     const shortCode = getEnvValue("MPESA_SHORTCODE");
     const passkey = getEnvValue("MPESA_PASSKEY");
-    const callbackUrl = getEnvValue("MPESA_CALLBACK_URL") || `${origin}/api/mpesa-callback`;
+    const callbackUrl = getEnvValue("MPESA_CALLBACK_URL") || `${origin}/api/mpesa/callback`;
 
     if (!shortCode || !passkey) {
       return res.status(500).json({ error: "MPESA_SHORTCODE or MPESA_PASSKEY is not configured." });
