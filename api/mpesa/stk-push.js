@@ -75,13 +75,20 @@ module.exports = async function handler(req, res) {
   } catch (error) {
     if (error.message === "fetch failed") {
       return res.status(502).json({
-        error: "Could not reach Safaricom Daraja. Restart the local project server with network access and try again."
+        error: `Could not reach Safaricom Daraja from the server. Check MPESA_ENV, redeploy environment variables, and confirm outbound HTTPS is available.${getNetworkCause(error)}`
       });
     }
 
     return res.status(500).json({ error: error.message || "M-Pesa STK Push failed." });
   }
 };
+
+function getNetworkCause(error) {
+  const cause = error.cause;
+  const details = [cause?.code, cause?.hostname, cause?.message].filter(Boolean).join(" - ");
+
+  return details ? ` Network detail: ${details}` : "";
+}
 
 async function getDarajaAccessToken() {
   const consumerKey = process.env.MPESA_CONSUMER_KEY;
