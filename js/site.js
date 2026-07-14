@@ -362,17 +362,23 @@ function applySelectedColorTint(product) {
   const selectedButton = document.querySelector(".color-swatch-group .swatch-btn.active");
   const colorHex = normalizeHexColor(selectedButton?.dataset.colorHex) || getVariantSwatchColor(selectedButton?.getAttribute("title"));
   const frames = document.querySelectorAll(".product-gallery .gallery-image-frame");
+  const shouldTint = shouldTintProductImage(product, colorHex);
 
   frames.forEach(frame => {
-    let tint = frame.querySelector(".product-color-tint");
-    if (!tint) {
-      tint = document.createElement("span");
-      tint.className = "product-color-tint";
-      frame.appendChild(tint);
+    const image = frame.querySelector("img");
+    let tintCanvas = frame.querySelector(".product-color-tint");
+    if (!tintCanvas) {
+      tintCanvas = document.createElement("canvas");
+      tintCanvas.className = "product-color-tint";
+      frame.appendChild(tintCanvas);
     }
 
-    tint.style.backgroundColor = colorHex;
-    tint.style.opacity = shouldTintProductImage(product, colorHex) ? "0.34" : "0";
+    if (!image || !shouldTint) {
+      tintCanvas.style.opacity = "0";
+      return;
+    }
+
+    recolorGarmentPixels(image, tintCanvas, colorHex);
   });
 }
 
@@ -389,6 +395,195 @@ function getTintedProductImage(product) {
 function normalizeHexColor(value) {
   const color = String(value || "").trim();
   return /^#(?:[0-9a-f]{3}){1,2}$/i.test(color) ? color : "";
+}
+
+function recolorGarmentPixels(image, canvas, colorHex) {
+  if (!image.complete || !image.naturalWidth) {
+    image.addEventListener("load", () => recolorGarmentPixels(image, canvas, colorHex), { once: true });
+    return;
+  }
+
+  const width = image.naturalWidth;
+  const height = image.naturalHeight;
+  const source = document.createElement("canvas");
+  const sourceContext = source.getContext("2d", { willReadFrequently: true });
+
+  source.width = width;
+  source.height = height;
+  canvas.width = width;
+  canvas.height = height;
+
+  try {
+    sourceContext.drawImage(image, 0, 0, width, height);
+    const imageData = sourceContext.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    const target = hexToHsl(colorHex);
+
+    if (!target) {
+      canvas.style.opacity = "0";
+      return;
+    }
+
+    for (let index = 0; index < data.length; index += 4) {
+      const red = data[index];
+      const green = data[index + 1];
+      const blue = data[index + 2];
+      const alpha = data[index + 3];
+
+      if (!isLikelyGarmentPixel(red, green, blue, alpha)) {
+        data[index + 3] = 0;
+        continue;
+      }
+
+      const original = rgbToHsl(red, green, blue);
+      const recolored = hslToRgb(
+        target.h,
+        Math.max(target.s, 18),
+        clamp(original.l * 0.9 + target.l * 0.1, 8, 92)
+      );
+
+      data[index] = recolored.r;
+      data[index + 1] = recolored.g;
+      data[index + 2] = recolored.b;
+      data[index + 3] = Math.min(alpha, 238);
+    }
+
+    canvas.getContext("2d").putImageData(imageData, 0, 0);
+    canvas.style.opacity = "1";
+  } catch (error) {
+    console.warn("Product color recolor unavailable:", error.message);
+    canvas.style.opacity = "0";
+  }
+}
+
+function isLikelyGarmentPixel(red, green, blue, alpha) {
+  if (alpha < 24) return false;
+
+  const max = Math.max(red, green, blue);
+  const min = Math.min(red, green, blue);
+  const range = max - min;
+  const lightness = ((max + min) / 2 / 255) * 100;
+
+  if (lightness > 88 && range < 42) return false;
+  if (lightness < 8) return false;
+
+  return range > 7 || lightness < 82;
+}
+
+function hexToHsl(hexColor) {
+  let hex = normalizeHexColor(hexColor).replace("#", "");
+  if (!hex) return null;
+
+  if (hex.length === 3) {
+    hex = hex.split("").map(char => char + char).join("");
+  }
+
+  const r = parseInt(hex.slice(0, 2), 16) / 255;
+  const g = parseInt(hex.slice(2, 4), 16) / 255;
+  const b = parseInt(hex.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const lightness = (max + min) / 2;
+  const delta = max - min;
+
+  if (delta === 0) {
+    return { h: 0, s: 0, l: lightness * 100 };
+  }
+
+  const saturation = delta / (1 - Math.abs(2 * lightness - 1));
+  let hue;
+
+  if (max === r) {
+    hue = ((g - b) / delta) % 6;
+  } else if (max === g) {
+    hue = (b - r) / delta + 2;
+  } else {
+    hue = (r - g) / delta + 4;
+  }
+
+  hue = Math.round(hue * 60);
+  if (hue < 0) hue += 360;
+
+  return {
+    h: hue,
+    s: saturation * 100,
+    l: lightness * 100
+  };
+}
+
+function rgbToHsl(red, green, blue) {
+  const r = red / 255;
+  const g = green / 255;
+  const b = blue / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const lightness = (max + min) / 2;
+  const delta = max - min;
+
+  if (delta === 0) {
+    return { h: 0, s: 0, l: lightness * 100 };
+  }
+
+  const saturation = delta / (1 - Math.abs(2 * lightness - 1));
+  let hue;
+
+  if (max === r) {
+    hue = ((g - b) / delta) % 6;
+  } else if (max === g) {
+    hue = (b - r) / delta + 2;
+  } else {
+    hue = (r - g) / delta + 4;
+  }
+
+  hue = Math.round(hue * 60);
+  if (hue < 0) hue += 360;
+
+  return {
+    h: hue,
+    s: saturation * 100,
+    l: lightness * 100
+  };
+}
+
+function hslToRgb(hue, saturation, lightness) {
+  const s = clamp(saturation, 0, 100) / 100;
+  const l = clamp(lightness, 0, 100) / 100;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs((hue / 60) % 2 - 1));
+  const m = l - c / 2;
+  let r = 0;
+  let g = 0;
+  let b = 0;
+
+  if (hue < 60) {
+    r = c;
+    g = x;
+  } else if (hue < 120) {
+    r = x;
+    g = c;
+  } else if (hue < 180) {
+    g = c;
+    b = x;
+  } else if (hue < 240) {
+    g = x;
+    b = c;
+  } else if (hue < 300) {
+    r = x;
+    b = c;
+  } else {
+    r = c;
+    b = x;
+  }
+
+  return {
+    r: Math.round((r + m) * 255),
+    g: Math.round((g + m) * 255),
+    b: Math.round((b + m) * 255)
+  };
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }
 
 function getVariantSwatchColor(color) {
