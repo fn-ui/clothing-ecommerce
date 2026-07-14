@@ -44,12 +44,7 @@ async function loadStats() {
         .select("*", { count: "exact", head: true });
 
     // Customers
-    const { count: customers } = await window.supabaseClient
-        .from("store_profiles")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "customer");
-
-    const publicCustomerLeads = await countTableRows("store_customer_leads");
+    const customers = await countCapturedCustomers();
 
     // Featured
     const { count: featured } = await window.supabaseClient
@@ -76,7 +71,7 @@ async function loadStats() {
     document.getElementById("productCount").textContent = products || 0;
     document.getElementById("categoryCount").textContent = categories || 0;
     document.getElementById("imageCount").textContent = images || 0;
-    document.getElementById("customerCount").textContent = (customers || 0) + publicCustomerLeads;
+    document.getElementById("customerCount").textContent = customers;
     setDashboardText("newsletterCount", newsletter);
     setDashboardText("checkoutIntentCount", checkoutIntents);
 
@@ -87,6 +82,56 @@ async function loadStats() {
     document.getElementById("productGrowth").textContent =
         `${products || 0} products available`;
 
+}
+
+async function countCapturedCustomers() {
+    const rows = [];
+
+    const { data: profiles, error: profileError } = await window.supabaseClient
+        .from("store_profiles")
+        .select("email,full_name,created_at")
+        .eq("role", "customer");
+
+    if (!profileError) {
+        (profiles || []).forEach(profile => rows.push({
+            email: profile.email,
+            name: profile.full_name,
+            created_at: profile.created_at
+        }));
+    }
+
+    const { data: leads, error: leadError } = await window.supabaseClient
+        .from("store_customer_leads")
+        .select("customer_email,customer_name,created_at");
+
+    if (!leadError) {
+        (leads || []).forEach(lead => rows.push({
+            email: lead.customer_email,
+            name: lead.customer_name,
+            created_at: lead.created_at
+        }));
+    }
+
+    const { data: checkouts, error: checkoutError } = await window.supabaseClient
+        .from("store_checkout_intents")
+        .select("customer_email,customer_name,created_at")
+        .not("customer_email", "is", null);
+
+    if (!checkoutError) {
+        (checkouts || []).forEach(checkout => rows.push({
+            email: checkout.customer_email,
+            name: checkout.customer_name,
+            created_at: checkout.created_at
+        }));
+    }
+
+    const seen = new Set();
+    return rows.filter(customer => {
+        const key = customer.email || `${customer.name}-${customer.created_at}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    }).length;
 }
 
 async function countTableRows(tableName) {
