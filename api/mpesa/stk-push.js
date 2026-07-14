@@ -19,9 +19,9 @@ module.exports = async function handler(req, res) {
     if (!phone) return res.status(400).json({ error: "A valid Safaricom phone number is required." });
     if (!amount || amount <= 0) return res.status(400).json({ error: "Payment amount is invalid." });
 
-    const shortCode = process.env.MPESA_SHORTCODE;
-    const passkey = process.env.MPESA_PASSKEY;
-    const callbackUrl = process.env.MPESA_CALLBACK_URL || `${origin}/api/mpesa-callback`;
+    const shortCode = getEnvValue("MPESA_SHORTCODE");
+    const passkey = getEnvValue("MPESA_PASSKEY");
+    const callbackUrl = getEnvValue("MPESA_CALLBACK_URL") || `${origin}/api/mpesa-callback`;
 
     if (!shortCode || !passkey) {
       return res.status(500).json({ error: "MPESA_SHORTCODE or MPESA_PASSKEY is not configured." });
@@ -41,10 +41,10 @@ module.exports = async function handler(req, res) {
         BusinessShortCode: shortCode,
         Password: password,
         Timestamp: timestamp,
-        TransactionType: process.env.MPESA_TRANSACTION_TYPE || "CustomerPayBillOnline",
+        TransactionType: getEnvValue("MPESA_TRANSACTION_TYPE") || "CustomerPayBillOnline",
         Amount: Math.ceil(amount),
         PartyA: phone,
-        PartyB: process.env.MPESA_PARTY_B || shortCode,
+        PartyB: getEnvValue("MPESA_PARTY_B") || shortCode,
         PhoneNumber: phone,
         CallBackURL: callbackUrl,
         AccountReference: checkoutId.slice(0, 12),
@@ -91,8 +91,8 @@ function getNetworkCause(error) {
 }
 
 async function getDarajaAccessToken() {
-  const consumerKey = process.env.MPESA_CONSUMER_KEY;
-  const consumerSecret = process.env.MPESA_CONSUMER_SECRET;
+  const consumerKey = getEnvValue("MPESA_CONSUMER_KEY");
+  const consumerSecret = getEnvValue("MPESA_CONSUMER_SECRET");
 
   if (!consumerKey || !consumerSecret) {
     throw new Error("MPESA_CONSUMER_KEY or MPESA_CONSUMER_SECRET is not configured.");
@@ -107,16 +107,30 @@ async function getDarajaAccessToken() {
   const payload = await response.json();
 
   if (!response.ok || !payload.access_token) {
-    throw new Error(payload.errorMessage || payload.error_description || "Daraja authentication failed.");
+    throw new Error(getDarajaAuthError(payload));
   }
 
   return payload.access_token;
 }
 
 function getDarajaBaseUrl() {
-  return process.env.MPESA_ENV === "live"
+  return getEnvValue("MPESA_ENV") === "live"
     ? "https://api.safaricom.co.ke"
     : "https://sandbox.safaricom.co.ke";
+}
+
+function getEnvValue(name) {
+  return String(process.env[name] || "").trim();
+}
+
+function getDarajaAuthError(payload) {
+  const message = payload.errorMessage || payload.error_description || payload.error || "Daraja authentication failed.";
+
+  if (/wrong credentials/i.test(message)) {
+    return "Daraja rejected MPESA_CONSUMER_KEY or MPESA_CONSUMER_SECRET. Confirm they come from the same Safaricom app as MPESA_ENV.";
+  }
+
+  return message;
 }
 
 function getDarajaTimestamp() {
