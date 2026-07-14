@@ -5,6 +5,8 @@
 let products = [];
 let filteredProducts = [];
 
+const PRODUCT_IMAGE_BUCKET = "store-products";
+
 const PRODUCTS_PER_PAGE = 10;
 
 let currentPage = 1;
@@ -792,6 +794,18 @@ function setSelectedProductAudience(audience = []) {
 
 function productSaveErrorMessage(error) {
 
+    if (/bucket not found/i.test(error?.message || "")) {
+
+        return "Supabase Storage bucket missing. Create a public bucket named store-products, then try again.";
+
+    }
+
+    if (/storage|row-level security|policy/i.test(error?.message || "")) {
+
+        return "Supabase Storage blocked the image upload. Check the store-products bucket policies.";
+
+    }
+
     if (error?.code === "PGRST204" || /audience|is_new_arrival/i.test(error?.message || "")) {
 
         return "Product placement columns are missing. Run the audience/is_new_arrival SQL from SETUP_STEPS.md.";
@@ -988,7 +1002,7 @@ async function uploadProductImages(productId, files){
 
         } = await window.supabaseClient.storage
 
-            .from("store_products")
+            .from(PRODUCT_IMAGE_BUCKET)
 
             .upload(filepath,file);
 
@@ -1004,7 +1018,7 @@ async function uploadProductImages(productId, files){
 
         } = window.supabaseClient.storage
 
-            .from("store_products")
+            .from(PRODUCT_IMAGE_BUCKET)
 
             .getPublicUrl(filepath);
 
@@ -1249,13 +1263,13 @@ async function deleteProductImage(image){
 
         Utils.showLoader("Deleting image...");
 
-        const path = image.image_url.split("/store_products/")[1];
+        const path = image.image_url.split(`/${PRODUCT_IMAGE_BUCKET}/`)[1];
 
         if(path){
 
             await window.supabaseClient.storage
 
-                .from("store_products")
+                .from(PRODUCT_IMAGE_BUCKET)
 
                 .remove([path]);
 
