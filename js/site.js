@@ -217,7 +217,10 @@ function initInlineAddToBagButtons() {
 
     const product = window.studioFindProduct(button.dataset.productId || button.dataset.id);
     if (typeof addItemToCart === "function") {
-      const added = addItemToCart(product.id, product.title, product.price, window.studioProductImage(product));
+      const added = addItemToCart(product.id, product.title, product.price, window.studioProductImage(product), {
+        color: product.kicker || product.category || "Default",
+        size: "Standard"
+      });
       if (!added) return;
 
       button.textContent = "Added";

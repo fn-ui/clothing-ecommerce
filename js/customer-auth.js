@@ -499,6 +499,11 @@ function currentBagCardTemplate(cartItems, cartTotal) {
 }
 
 function orderItemTemplate(item) {
+  const variantDetails = [
+    item.color ? `Color: ${escapeCustomerText(item.color)}` : "",
+    item.size ? `Size: ${escapeCustomerText(item.size)}` : ""
+  ].filter(Boolean).join(" / ");
+
   return `
     <div class="order-card-items-preview">
       <div class="preview-item-thumbnail">
@@ -507,7 +512,7 @@ function orderItemTemplate(item) {
       </div>
       <div class="preview-item-info-strings">
         <h5>${escapeCustomerText(item.title || "Product")}</h5>
-        <span>Quantity: ${item.quantity || 1} / $${Number(item.price || 0).toFixed(2)} each</span>
+        <span>${variantDetails ? `${variantDetails} / ` : ""}Quantity: ${item.quantity || 1} / $${Number(item.price || 0).toFixed(2)} each</span>
       </div>
     </div>
   `;

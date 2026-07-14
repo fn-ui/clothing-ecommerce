@@ -56,7 +56,7 @@ function getCartQuantity() {
 // ===============================
 // ADD TO CART
 // ===============================
-function addItemToCart(id, title, price, img) {
+function addItemToCart(id, title, price, img, options = {}) {
   if (!isCustomerSignedInForCart()) {
     promptSignInForCart();
     return false;
@@ -69,16 +69,25 @@ function addItemToCart(id, title, price, img) {
       ? parseFloat(price.replace(/[^0-9.]/g, ''))
       : price;
 
-  const existingItem = cartItems.find(item => String(item.id) === String(id));
+  const size = String(options.size || '').trim();
+  const color = String(options.color || '').trim();
+  const variantKey = [id, size || 'one-size', color || 'default']
+    .map(value => String(value).trim().toLowerCase().replace(/\s+/g, '-'))
+    .join(':');
+
+  const existingItem = cartItems.find(item => String(item.variantKey || item.id) === variantKey);
 
   if (existingItem) {
     existingItem.quantity += 1;
   } else {
     cartItems.push({
       id: String(id),
+      variantKey,
       title,
       price: numericalPrice,
       img,
+      size,
+      color,
       quantity: 1
     });
   }
@@ -91,6 +100,8 @@ const toast = document.getElementById('toastNotification');
 if (toast) {
   toast.textContent = `${title} added to bag ✓`;
 
+  const variantText = [color, size].filter(Boolean).join(' / ');
+  toast.textContent = `${title}${variantText ? ` (${variantText})` : ''} added to bag`;
   toast.classList.add('show');
 
   setTimeout(() => {
@@ -199,11 +210,16 @@ function syncCartUI() {
       item.price * item.quantity;
     const safeTitle = escapeCartText(item.title);
     const safeImg = escapeCartText(item.img);
+    const itemKey = escapeCartText(item.variantKey || item.id);
+    const variantDetails = [
+      item.color ? `Color: ${escapeCartText(item.color)}` : '',
+      item.size ? `Size: ${escapeCartText(item.size)}` : ''
+    ].filter(Boolean).join(' / ');
 
     runningSubtotal += itemLineTotal;
 
     listHTML += `
-      <div class="cart-item-card" data-id="${item.id}">
+      <div class="cart-item-card" data-key="${itemKey}">
         
         <div class="cart-item-image">
           <img src="${safeImg}" alt="${safeTitle}">
@@ -220,6 +236,7 @@ function syncCartUI() {
           </div>
 
           <span class="item-variant-meta">
+            ${variantDetails || 'Standard option'}<br>
             Quantity: ${item.quantity}
           </span>
 
@@ -333,12 +350,12 @@ function initCartDrawerInteractions() {
     if (!itemCard) return;
 
     const targetId =
-      itemCard.getAttribute('data-id');
+      itemCard.getAttribute('data-key');
 
     let cartItems = getCartItems();
 
     const targetItem =
-      cartItems.find(item => item.id == targetId);
+      cartItems.find(item => String(item.variantKey || item.id) === String(targetId));
 
     if (!targetItem) return;
 
@@ -349,7 +366,7 @@ function initCartDrawerInteractions() {
         targetItem.quantity -= 1;
       } else {
         cartItems =
-          cartItems.filter(item => item.id != targetId);
+          cartItems.filter(item => String(item.variantKey || item.id) !== String(targetId));
       }
 
       saveCartItems(cartItems);
@@ -367,7 +384,7 @@ function initCartDrawerInteractions() {
     if (event.target.classList.contains('item-remove-btn')) {
 
       cartItems =
-        cartItems.filter(item => item.id != targetId);
+        cartItems.filter(item => String(item.variantKey || item.id) !== String(targetId));
 
       saveCartItems(cartItems);
     }

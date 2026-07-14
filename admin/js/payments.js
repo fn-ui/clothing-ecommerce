@@ -98,8 +98,17 @@ function exportPayments() {
 
 function summarizePaymentItems(items) {
     const parsedItems = Array.isArray(items) ? items : [];
-    const itemCount = parsedItems.reduce((total, item) => total + Number(item.quantity || 1), 0);
-    return itemCount ? `${itemCount} item${itemCount === 1 ? "" : "s"}` : "-";
+
+    if (!parsedItems.length) return "-";
+
+    return parsedItems.map(item => {
+        const variants = [
+            item.color ? `Color: ${item.color}` : "",
+            item.size ? `Size: ${item.size}` : ""
+        ].filter(Boolean).join(", ");
+        const quantity = Number(item.quantity || 1);
+        return `${item.title || "Product"} x${quantity}${variants ? ` - ${variants}` : ""}`;
+    }).join("; ");
 }
 
 function formatPaymentMethod(method) {

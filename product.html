@@ -201,8 +201,13 @@ if (addToBagBtn) {
     const pTitle = addToBagBtn.dataset.productTitle;
     const pPrice = addToBagBtn.dataset.productPrice;
     const pImg = addToBagBtn.dataset.productImg;
+    const selectedColor = document.querySelector('.color-swatch-group .swatch-btn.active')?.getAttribute('title') || '';
+    const selectedSize = document.querySelector('.size-buttons-grid .size-box-btn.active')?.textContent.trim() || '';
 
-    const added = addItemToCart(pid, pTitle, pPrice, pImg);
+    const added = addItemToCart(pid, pTitle, pPrice, pImg, {
+      color: selectedColor,
+      size: selectedSize
+    });
 
     if (!added) return;
 
