@@ -37,6 +37,7 @@ async function hydrateStorefrontProductsFromSupabase() {
       store_product_variants (
         id,
         color,
+        color_hex,
         size,
         stock,
         sku,
@@ -112,6 +113,7 @@ function normalizeStorefrontProduct(product) {
     variants: variants.map(variant => ({
       id: variant.id,
       color: variant.color,
+      colorHex: variant.color_hex || "",
       size: variant.size,
       stock: Number(variant.stock || 0),
       sku: variant.sku || "",
@@ -255,15 +257,16 @@ function hydrateProductVariantSelectors(product) {
   const selectedColorText = document.querySelector(".selector-label .selected-value");
   if (!colorGroup || !sizeGrid) return;
 
-  const colors = [...new Set(variants.map(variant => variant.color).filter(Boolean))];
+  const colorOptions = getProductColorOptions(variants);
   const sizes = [...new Set(variants.map(variant => variant.size).filter(Boolean))];
   const firstAvailable = variants.find(variant => variant.stock > 0) || variants[0];
 
-  colorGroup.innerHTML = colors.map(color => `
+  colorGroup.innerHTML = colorOptions.map(option => `
     <button
-      class="swatch-btn ${color === firstAvailable.color ? "active" : ""}"
-      style="background-color: ${getVariantSwatchColor(color)};"
-      title="${escapeSiteText(color)}"
+      class="swatch-btn ${option.color === firstAvailable.color ? "active" : ""}"
+      style="background-color: ${option.hex};"
+      title="${escapeSiteText(option.color)}"
+      data-color-hex="${escapeSiteText(option.hex)}"
       type="button"
     ></button>
   `).join("");
@@ -275,8 +278,23 @@ function hydrateProductVariantSelectors(product) {
   }).join("");
 
   if (selectedColorText) selectedColorText.textContent = firstAvailable.color || "";
+  applySelectedColorTint(product);
   updateSelectedVariantData(product);
   bindVariantSelectorEvents(product);
+}
+
+function getProductColorOptions(variants) {
+  const options = new Map();
+
+  variants.forEach(variant => {
+    if (!variant.color || options.has(variant.color)) return;
+    options.set(variant.color, {
+      color: variant.color,
+      hex: normalizeHexColor(variant.colorHex) || getVariantSwatchColor(variant.color)
+    });
+  });
+
+  return [...options.values()];
 }
 
 function bindVariantSelectorEvents(product) {
@@ -289,6 +307,7 @@ function bindVariantSelectorEvents(product) {
       if (selectedColorText) selectedColorText.textContent = button.getAttribute("title") || "";
 
       updateSizeAvailabilityForColor(product);
+      applySelectedColorTint(product);
       updateSelectedVariantData(product);
     });
   });
@@ -334,8 +353,42 @@ function updateSelectedVariantData(product) {
 
   addButton.dataset.variantId = variant?.id || "";
   addButton.dataset.variantStock = String(variant?.stock ?? "");
+  addButton.dataset.productImg = getTintedProductImage(product);
   addButton.disabled = Boolean(variant && variant.stock <= 0);
   addButton.textContent = variant && variant.stock <= 0 ? "Sold Out" : "Add To Shopping Bag";
+}
+
+function applySelectedColorTint(product) {
+  const selectedButton = document.querySelector(".color-swatch-group .swatch-btn.active");
+  const colorHex = normalizeHexColor(selectedButton?.dataset.colorHex) || getVariantSwatchColor(selectedButton?.getAttribute("title"));
+  const frames = document.querySelectorAll(".product-gallery .gallery-image-frame");
+
+  frames.forEach(frame => {
+    let tint = frame.querySelector(".product-color-tint");
+    if (!tint) {
+      tint = document.createElement("span");
+      tint.className = "product-color-tint";
+      frame.appendChild(tint);
+    }
+
+    tint.style.backgroundColor = colorHex;
+    tint.style.opacity = shouldTintProductImage(product, colorHex) ? "0.34" : "0";
+  });
+}
+
+function shouldTintProductImage(product, colorHex) {
+  const baseImage = window.studioProductImage(product);
+  if (!baseImage || baseImage.includes("hero-studio.svg")) return false;
+  return Boolean(colorHex);
+}
+
+function getTintedProductImage(product) {
+  return window.studioProductImage(product);
+}
+
+function normalizeHexColor(value) {
+  const color = String(value || "").trim();
+  return /^#(?:[0-9a-f]{3}){1,2}$/i.test(color) ? color : "";
 }
 
 function getVariantSwatchColor(color) {

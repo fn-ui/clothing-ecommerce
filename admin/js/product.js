@@ -794,6 +794,12 @@ function setSelectedProductAudience(audience = []) {
 
 function productSaveErrorMessage(error) {
 
+    if (/color_hex/i.test(error?.message || "")) {
+
+        return "Variant color hex support is missing. Run the store_product_variants color_hex SQL, then save again.";
+
+    }
+
     if (/bucket not found/i.test(error?.message || "")) {
 
         return "Supabase Storage bucket missing. Create a public bucket named store-products, then try again.";
@@ -930,9 +936,17 @@ function getParsedProductVariants() {
         .map(line => line.trim())
         .filter(Boolean)
         .map(line => {
-            const [color, size, stock, sku] = line.split(",").map(part => part.trim());
+            const parts = line.split(",").map(part => part.trim());
+            const hasColorHex = /^#(?:[0-9a-f]{3}){1,2}$/i.test(parts[1] || "");
+            const color = parts[0];
+            const colorHex = hasColorHex ? parts[1] : "";
+            const size = hasColorHex ? parts[2] : parts[1];
+            const stock = hasColorHex ? parts[3] : parts[2];
+            const sku = hasColorHex ? parts[4] : parts[3];
+
             return {
                 color,
+                colorHex,
                 size,
                 stock: Math.max(0, Number(stock || 0)),
                 sku: sku || null
@@ -956,6 +970,7 @@ async function saveProductVariants(productId) {
         .insert(variants.map(variant => ({
             product_id: productId,
             color: variant.color,
+            color_hex: variant.colorHex || null,
             size: variant.size,
             stock: variant.stock,
             sku: variant.sku
@@ -971,6 +986,7 @@ function hydrateProductVariantsField(variants) {
     field.value = (variants || [])
         .map(variant => [
             variant.color,
+            variant.color_hex || "",
             variant.size,
             Number(variant.stock || 0),
             variant.sku || ""

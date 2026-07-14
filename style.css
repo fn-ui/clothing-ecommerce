@@ -763,6 +763,7 @@
 }
 
 .gallery-image-frame {
+  position: relative;
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -771,11 +772,23 @@
   box-shadow: 0 10px 30px rgba(15,23,42,0.05);
 }
 
+.product-color-tint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transition: background-color .25s ease, opacity .25s ease;
+  z-index: 2;
+}
+
 .gallery-image-frame img {
   width: 100%;
   height: auto;
   object-fit: cover;
   display: block;
+  position: relative;
+  z-index: 1;
   transition: transform .5s ease;
 }
 

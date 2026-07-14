@@ -18,6 +18,11 @@ set
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
 
+drop policy if exists "Public product images are readable" on storage.objects;
+drop policy if exists "Authenticated users can upload product images" on storage.objects;
+drop policy if exists "Authenticated users can update product images" on storage.objects;
+drop policy if exists "Authenticated users can delete product images" on storage.objects;
+
 create policy "Public product images are readable"
 on storage.objects
 for select

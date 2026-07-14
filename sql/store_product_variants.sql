@@ -2,6 +2,7 @@ create table if not exists public.store_product_variants (
   id uuid not null default gen_random_uuid(),
   product_id uuid not null,
   color text not null,
+  color_hex text null,
   size text not null,
   stock integer not null default 0,
   sku text null,
