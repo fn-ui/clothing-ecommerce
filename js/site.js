@@ -501,7 +501,7 @@ function buildGarmentPixelMask(data, width, height) {
         }
       }
 
-      cleanMask[pixelIndex] = neighbors >= 6 ? 1 : 0;
+      cleanMask[pixelIndex] = neighbors >= 4 ? 1 : 0;
     }
   }
 
@@ -530,13 +530,13 @@ function isLikelyGarmentPixel(red, green, blue, alpha) {
   const blueDominance = blue - Math.max(red, green);
   const warmDominance = Math.max(red, green) - blue;
 
-  if (min > 205) return false;
-  if (lightness > 80 && range < 52) return false;
-  if (lightness > 68 && range < 30) return false;
+  if (min > 218) return false;
+  if (lightness > 91 && range < 44) return false;
+  if (lightness > 84 && range < 18) return false;
   if (lightness < 8) return false;
-  if (warmDominance > 12 && lightness > 58) return false;
+  if (warmDominance > 18 && lightness > 58) return false;
 
-  return blueDominance > -8 && (range > 12 || lightness < 74);
+  return blueDominance > -18 || (range > 14 && lightness < 86);
 }
 
 function hexToHsl(hexColor) {
