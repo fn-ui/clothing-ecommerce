@@ -459,16 +459,14 @@ function recolorGarmentPixels(image, canvas, colorHex) {
       data[index] = recolored.r;
       data[index + 1] = recolored.g;
       data[index + 2] = recolored.b;
-      data[index + 3] = Math.min(alpha, 238);
+      data[index + 3] = Math.min(alpha, 218);
     }
 
     canvas.getContext("2d").putImageData(imageData, 0, 0);
-    image.classList.add("has-product-recolor");
     image.style.filter = "";
     canvas.style.opacity = "1";
   } catch (error) {
     console.warn("Product color recolor unavailable:", error.message);
-    image.classList.remove("has-product-recolor");
     image.style.filter = getProductFallbackFilter(colorHex);
     canvas.style.opacity = "0";
   }
@@ -494,10 +492,12 @@ function isLikelyGarmentPixel(red, green, blue, alpha) {
   const range = max - min;
   const lightness = ((max + min) / 2 / 255) * 100;
 
-  if (lightness > 88 && range < 42) return false;
+  if (min > 205) return false;
+  if (lightness > 82 && range < 48) return false;
+  if (lightness > 72 && range < 24) return false;
   if (lightness < 8) return false;
 
-  return range > 7 || lightness < 82;
+  return range > 10 || lightness < 76;
 }
 
 function hexToHsl(hexColor) {
