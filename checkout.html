@@ -222,6 +222,62 @@
       }
     }
 
+    function getCurrentCartKey() {
+      try {
+        const customer = JSON.parse(localStorage.getItem('studioFitCustomer'));
+        if (customer?.email) {
+          return `studioFitCart:${String(customer.email).trim().toLowerCase()}`;
+        }
+      } catch (error) {
+        return 'studioFitCart:guest';
+      }
+
+      return 'studioFitCart:guest';
+    }
+
+    async function pollMpesaPayment(checkoutRequestId) {
+      if (!checkoutRequestId) {
+        toast.textContent = 'M-Pesa prompt sent. Complete payment on your phone.';
+        return;
+      }
+
+      toast.textContent = 'M-Pesa prompt sent. Waiting for payment confirmation...';
+
+      for (let attempt = 1; attempt <= 12; attempt += 1) {
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        const response = await fetch('/api/mpesa-query', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ checkoutRequestId })
+        });
+
+        const result = await readPaymentResponse(response, 'M-Pesa');
+
+        if (!response.ok) {
+          throw new Error(result.error || 'M-Pesa status check failed.');
+        }
+
+        if (result.paid) {
+          toast.textContent = 'M-Pesa payment confirmed. Order marked as paid.';
+          localStorage.removeItem(getCurrentCartKey());
+          if (typeof syncCartUI === 'function') syncCartUI();
+          return;
+        }
+
+        if (!result.pending) {
+          toast.textContent = result.message || 'M-Pesa payment was not completed.';
+          return;
+        }
+
+        toast.textContent = `Waiting for M-Pesa confirmation... (${attempt}/12)`;
+      }
+
+      toast.textContent = 'M-Pesa prompt sent. Confirmation is still pending; check your account orders shortly.';
+    }
+
     function setPaymentMethod(method) {
       document.querySelectorAll('.payment-method-option').forEach(option => {
         option.classList.toggle(
@@ -388,6 +444,7 @@
           }
 
           toast.textContent = paymentResult.message || 'M-Pesa prompt sent. Complete payment on your phone.';
+          await pollMpesaPayment(paymentResult.checkout_request_id);
           return;
         } catch (error) {
           console.error('M-Pesa STK Push failed:', error);

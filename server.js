@@ -13,8 +13,10 @@ const apiRoutes = {
   "/api/paypal/capture-order": "./api/paypal/capture-order",
   "/api/mpesa-stk-push": "./api/mpesa-stk-push",
   "/api/mpesa-callback": "./api/mpesa-callback",
+  "/api/mpesa-query": "./api/mpesa-query",
   "/api/mpesa/stk-push": "./api/mpesa/stk-push",
   "/api/mpesa/callback": "./api/mpesa/callback",
+  "/api/mpesa/query": "./api/mpesa/query",
   "/api/paystack/initialize": "./api/paystack/initialize",
   "/api/paystack/verify": "./api/paystack/verify"
 };
