@@ -432,6 +432,7 @@ function recolorGarmentPixels(image, canvas, colorHex) {
     const imageData = sourceContext.getImageData(0, 0, width, height);
     const data = imageData.data;
     const target = hexToHsl(colorHex);
+    const fabricMask = buildGarmentPixelMask(data, width, height);
 
     if (!target) {
       canvas.style.opacity = "0";
@@ -443,8 +444,9 @@ function recolorGarmentPixels(image, canvas, colorHex) {
       const green = data[index + 1];
       const blue = data[index + 2];
       const alpha = data[index + 3];
+      const pixelIndex = index / 4;
 
-      if (!isLikelyGarmentPixel(red, green, blue, alpha)) {
+      if (!fabricMask[pixelIndex]) {
         data[index + 3] = 0;
         continue;
       }
@@ -459,7 +461,7 @@ function recolorGarmentPixels(image, canvas, colorHex) {
       data[index] = recolored.r;
       data[index + 1] = recolored.g;
       data[index + 2] = recolored.b;
-      data[index + 3] = Math.min(alpha, 218);
+      data[index + 3] = Math.min(alpha, 172);
     }
 
     canvas.getContext("2d").putImageData(imageData, 0, 0);
@@ -470,6 +472,40 @@ function recolorGarmentPixels(image, canvas, colorHex) {
     image.style.filter = getProductFallbackFilter(colorHex);
     canvas.style.opacity = "0";
   }
+}
+
+function buildGarmentPixelMask(data, width, height) {
+  const roughMask = new Uint8Array(width * height);
+  const cleanMask = new Uint8Array(width * height);
+
+  for (let index = 0; index < data.length; index += 4) {
+    const pixelIndex = index / 4;
+    roughMask[pixelIndex] = isLikelyGarmentPixel(
+      data[index],
+      data[index + 1],
+      data[index + 2],
+      data[index + 3]
+    ) ? 1 : 0;
+  }
+
+  for (let y = 1; y < height - 1; y += 1) {
+    for (let x = 1; x < width - 1; x += 1) {
+      const pixelIndex = y * width + x;
+      if (!roughMask[pixelIndex]) continue;
+
+      let neighbors = 0;
+
+      for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
+        for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+          neighbors += roughMask[(y + offsetY) * width + x + offsetX];
+        }
+      }
+
+      cleanMask[pixelIndex] = neighbors >= 6 ? 1 : 0;
+    }
+  }
+
+  return cleanMask;
 }
 
 function getProductFallbackFilter(colorHex) {
@@ -491,13 +527,16 @@ function isLikelyGarmentPixel(red, green, blue, alpha) {
   const min = Math.min(red, green, blue);
   const range = max - min;
   const lightness = ((max + min) / 2 / 255) * 100;
+  const blueDominance = blue - Math.max(red, green);
+  const warmDominance = Math.max(red, green) - blue;
 
   if (min > 205) return false;
-  if (lightness > 82 && range < 48) return false;
-  if (lightness > 72 && range < 24) return false;
+  if (lightness > 80 && range < 52) return false;
+  if (lightness > 68 && range < 30) return false;
   if (lightness < 8) return false;
+  if (warmDominance > 12 && lightness > 58) return false;
 
-  return range > 10 || lightness < 76;
+  return blueDominance > -8 && (range > 12 || lightness < 74);
 }
 
 function hexToHsl(hexColor) {
