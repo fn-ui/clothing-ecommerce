@@ -36,13 +36,18 @@ module.exports = async function handler(req, res) {
     res.setHeader("Content-Type", contentType);
     res.setHeader("Content-Length", String(buffer.length));
 
-    return res.status(200).send(buffer);
+    res.status(200);
+    return sendBinary(res, buffer);
   } catch (error) {
     return res.status(500).json({ error: error.message || "Image proxy failed." });
   }
 };
 
 function getImageUrl(req) {
+  if (req.query?.url) {
+    return Array.isArray(req.query.url) ? req.query.url[0] : req.query.url;
+  }
+
   try {
     const host = req.headers.host || "localhost";
     const requestUrl = new URL(req.url || "", `http://${host}`);
@@ -50,4 +55,12 @@ function getImageUrl(req) {
   } catch (error) {
     return "";
   }
+}
+
+function sendBinary(res, buffer) {
+  if (typeof res.send === "function") {
+    return res.send(buffer);
+  }
+
+  return res.end(buffer);
 }
