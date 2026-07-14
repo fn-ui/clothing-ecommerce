@@ -630,6 +630,8 @@ let selectedImages = [];
 async function loadAddProduct() {
 
     editingProductId = null;
+    sessionStorage.removeItem("editingProductId");
+    selectedImages = [];
 
     await loadProductCategories();
 
@@ -1044,6 +1046,7 @@ let editingProductId = null;
 function editProduct(id){
 
     editingProductId = id;
+    sessionStorage.setItem("editingProductId", id);
 
     loadPage("edit-product");
 
@@ -1053,6 +1056,9 @@ function editProduct(id){
 // ==========================================
 
 async function loadEditProduct(){
+
+    editingProductId = editingProductId || sessionStorage.getItem("editingProductId");
+    selectedImages = [];
 
     await loadProductCategories();
 
@@ -1071,9 +1077,15 @@ async function loadEditProduct(){
 
 async function populateProduct(){
 
-    if(!editingProductId) return;
+    editingProductId = editingProductId || sessionStorage.getItem("editingProductId");
 
-    const {
+    if(!editingProductId) {
+        Utils.toast("Select a product to edit first.", "error");
+        loadPage("products");
+        return;
+    }
+
+    let {
 
         data,
 
@@ -1095,11 +1107,26 @@ async function populateProduct(){
 
     if(error){
 
+        const fallback = await window.supabaseClient
+            .from("store_products")
+            .select("*, store_product_images(*)")
+            .eq("id",editingProductId)
+            .single();
+
+        data = fallback.data;
+        error = fallback.error;
+
+    }
+
+    if(error){
+
         Utils.toast(error.message,"error");
 
         return;
 
     }
+
+    data.store_product_variants = data.store_product_variants || await fetchProductVariants(editingProductId);
 
     document.querySelector(".page-title").textContent="Edit Product";
     document.querySelector(".page-subtitle").textContent =
@@ -1130,6 +1157,27 @@ async function populateProduct(){
 
     const submitBtn = document.querySelector("#productForm button[type='submit']");
     if (submitBtn) submitBtn.textContent = "Update Product";
+
+}
+
+async function fetchProductVariants(productId) {
+
+    const { data, error } = await window.supabaseClient
+        .from("store_product_variants")
+        .select("*")
+        .eq("product_id", productId)
+        .order("color")
+        .order("size");
+
+    if (error) {
+
+        console.warn("Product variants unavailable:", error.message);
+
+        return [];
+
+    }
+
+    return data || [];
 
 }
 // ==========================================
