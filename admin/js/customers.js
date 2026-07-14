@@ -20,7 +20,7 @@ async function fetchCustomers() {
     });
 
     filteredCustomerRows = [...customerRows];
-    updateCustomerStats(profileRows.length, leadRows.length + checkoutRows.length);
+    updateCustomerStats();
     renderCustomers();
 }
 
@@ -87,7 +87,10 @@ async function fetchCheckoutCustomers() {
     }));
 }
 
-function updateCustomerStats(profileCount, leadCount) {
+function updateCustomerStats() {
+    const profileCount = customerRows.filter(customer => customer.source === "Profile").length;
+    const leadCount = customerRows.length - profileCount;
+
     setCustomerText("totalCustomers", customerRows.length);
     setCustomerText("profileCustomers", profileCount);
     setCustomerText("leadCustomers", leadCount);
