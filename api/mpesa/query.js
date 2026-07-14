@@ -1,4 +1,5 @@
 const { loadLocalEnv } = require("../_load-env");
+const { decrementStockForCheckout, fetchCheckoutIntent } = require("../_stock");
 
 module.exports = async function handler(req, res) {
   loadLocalEnv();
@@ -52,7 +53,7 @@ module.exports = async function handler(req, res) {
     const pending = resultCode == null;
 
     if (!pending) {
-      await updateCheckoutIntentByReference(checkoutRequestId, {
+      const updateResult = await updateCheckoutIntentByReference(checkoutRequestId, {
         status: paid ? "paid" : "pending",
         payment_provider: "mpesa",
         payment_reference: checkoutRequestId,
@@ -60,6 +61,12 @@ module.exports = async function handler(req, res) {
         paid_at: paid ? new Date().toISOString() : null,
         gateway_response: payload.ResultDesc || payload.ResponseDescription || null
       });
+
+      if (!updateResult.ok) {
+        return res.status(500).json({
+          error: updateResult.error || "M-Pesa status received, but the order status could not be updated."
+        });
+      }
     }
 
     return res.status(200).json({
@@ -138,9 +145,12 @@ async function updateCheckoutIntentByReference(reference, patch) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!supabaseUrl || !serviceRoleKey) return;
+  if (!supabaseUrl || !serviceRoleKey) return { ok: false, error: "SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not configured." };
 
-  await fetch(`${supabaseUrl}/rest/v1/store_checkout_intents?payment_reference=eq.${encodeURIComponent(reference)}`, {
+  const filter = `payment_reference=eq.${encodeURIComponent(reference)}`;
+  const existingCheckout = await fetchCheckoutIntent(filter, supabaseUrl, serviceRoleKey);
+
+  const response = await fetch(`${supabaseUrl}/rest/v1/store_checkout_intents?${filter}`, {
     method: "PATCH",
     headers: {
       apikey: serviceRoleKey,
@@ -150,4 +160,19 @@ async function updateCheckoutIntentByReference(reference, patch) {
     },
     body: JSON.stringify(patch)
   });
+
+  if (!response.ok) {
+    const message = await response.text();
+    return {
+      ok: false,
+      error: message || `Supabase update failed with status ${response.status}.`
+    };
+  }
+
+  if (patch.status === "paid") {
+    const stockResult = await decrementStockForCheckout(existingCheckout, supabaseUrl, serviceRoleKey);
+    if (!stockResult.ok) return stockResult;
+  }
+
+  return { ok: true };
 }

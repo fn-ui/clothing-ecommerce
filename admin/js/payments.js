@@ -103,11 +103,11 @@ function summarizePaymentItems(items) {
 
     return parsedItems.map(item => {
         const variants = [
-            item.color ? `Color: ${item.color}` : "",
-            item.size ? `Size: ${item.size}` : ""
+            item.color ? `Color: ${escapeAdminText(item.color)}` : "",
+            item.size ? `Size: ${escapeAdminText(item.size)}` : ""
         ].filter(Boolean).join(", ");
         const quantity = Number(item.quantity || 1);
-        return `${item.title || "Product"} x${quantity}${variants ? ` - ${variants}` : ""}`;
+        return `${escapeAdminText(item.title || "Product")} x${quantity}${variants ? ` - ${variants}` : ""}`;
     }).join("; ");
 }
 

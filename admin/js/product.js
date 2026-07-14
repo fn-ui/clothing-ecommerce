@@ -833,7 +833,9 @@ async function saveProduct(e) {
 
             price: Number(document.getElementById("productPrice").value),
 
-            stock: Number(document.getElementById("productStock").value),
+            stock: getParsedProductVariants().length
+                ? getParsedProductVariants().reduce((total, variant) => total + variant.stock, 0)
+                : Number(document.getElementById("productStock").value),
 
             audience: getSelectedProductAudience(),
 
@@ -864,6 +866,8 @@ async function saveProduct(e) {
         } = await query;
 
         if (productError) throw productError;
+
+        await saveProductVariants(insertedProduct.id);
 
         if (selectedImages.length > 0) {
 
@@ -900,6 +904,64 @@ async function saveProduct(e) {
     }
 
 }
+
+function getParsedProductVariants() {
+    const field = document.getElementById("productVariants");
+    if (!field) return [];
+
+    return field.value
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => {
+            const [color, size, stock, sku] = line.split(",").map(part => part.trim());
+            return {
+                color,
+                size,
+                stock: Math.max(0, Number(stock || 0)),
+                sku: sku || null
+            };
+        })
+        .filter(variant => variant.color && variant.size);
+}
+
+async function saveProductVariants(productId) {
+    const variants = getParsedProductVariants();
+
+    await window.supabaseClient
+        .from("store_product_variants")
+        .delete()
+        .eq("product_id", productId);
+
+    if (!variants.length) return;
+
+    const { error } = await window.supabaseClient
+        .from("store_product_variants")
+        .insert(variants.map(variant => ({
+            product_id: productId,
+            color: variant.color,
+            size: variant.size,
+            stock: variant.stock,
+            sku: variant.sku
+        })));
+
+    if (error) throw error;
+}
+
+function hydrateProductVariantsField(variants) {
+    const field = document.getElementById("productVariants");
+    if (!field) return;
+
+    field.value = (variants || [])
+        .map(variant => [
+            variant.color,
+            variant.size,
+            Number(variant.stock || 0),
+            variant.sku || ""
+        ].filter(value => value !== "").join(", "))
+        .join("\n");
+}
+
 // ==========================================
 // UPLOAD PRODUCT IMAGES
 // ==========================================
@@ -1023,7 +1085,8 @@ async function populateProduct(){
 
         .select(`
             *,
-            store_product_images(*)
+            store_product_images(*),
+            store_product_variants(*)
         `)
 
         .eq("id",editingProductId)
@@ -1051,6 +1114,7 @@ async function populateProduct(){
     document.getElementById("productPrice").value=data.price;
 
     document.getElementById("productStock").value=data.stock;
+    hydrateProductVariantsField(data.store_product_variants || []);
 
     document.getElementById("productCategory").value=data.category_id;
 

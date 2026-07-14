@@ -1,4 +1,5 @@
 const { loadLocalEnv } = require("../_load-env");
+const { decrementStockForCheckout, fetchCheckoutIntent } = require("../_stock");
 
 module.exports = async function handler(req, res) {
   loadLocalEnv();
@@ -122,6 +123,7 @@ async function updateCheckoutIntent(reference, patch, checkoutId) {
   const filter = checkoutId
     ? `id=eq.${encodeURIComponent(checkoutId)}`
     : `payment_reference=eq.${encodeURIComponent(reference)}`;
+  const existingCheckout = await fetchCheckoutIntent(filter, supabaseUrl, serviceRoleKey);
 
   const response = await fetch(`${supabaseUrl}/rest/v1/store_checkout_intents?${filter}`, {
     method: "PATCH",
@@ -140,6 +142,11 @@ async function updateCheckoutIntent(reference, patch, checkoutId) {
       ok: false,
       error: message || `Supabase update failed with status ${response.status}.`
     };
+  }
+
+  if (patch.status === "paid") {
+    const stockResult = await decrementStockForCheckout(existingCheckout, supabaseUrl, serviceRoleKey);
+    if (!stockResult.ok) return stockResult;
   }
 
   return { ok: true };

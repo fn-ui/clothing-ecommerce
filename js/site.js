@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function hydrateStorefrontProductsFromSupabase() {
   if (!window.publicSupabaseClient) return;
 
-  const { data, error } = await window.publicSupabaseClient
+  let { data, error } = await window.publicSupabaseClient
     .from("store_products")
     .select(`
       id,
@@ -33,10 +33,48 @@ async function hydrateStorefrontProductsFromSupabase() {
       store_product_images (
         image_url,
         is_primary
+      ),
+      store_product_variants (
+        id,
+        color,
+        size,
+        stock,
+        sku,
+        image_url
       )
     `)
     .eq("active", true)
     .order("created_at", { ascending: false });
+
+  if (error && String(error.message || "").includes("store_product_variants")) {
+    const fallback = await window.publicSupabaseClient
+      .from("store_products")
+      .select(`
+        id,
+        name,
+        slug,
+        description,
+        price,
+        stock,
+        featured,
+        active,
+        audience,
+        is_new_arrival,
+        store_categories (
+          name,
+          slug
+        ),
+        store_product_images (
+          image_url,
+          is_primary
+        )
+      `)
+      .eq("active", true)
+      .order("created_at", { ascending: false });
+
+    data = fallback.data;
+    error = fallback.error;
+  }
 
   if (error || !data?.length) {
     if (error) console.warn("Storefront product sync unavailable:", error.message);
@@ -55,6 +93,7 @@ function normalizeStorefrontProduct(product) {
   const primaryImage = images.find(image => image.is_primary) || images[0];
   const secondaryImage = images.find(image => !image.is_primary) || images[1] || primaryImage;
   const category = product.store_categories?.slug || product.store_categories?.name?.toLowerCase() || "uncategorized";
+  const variants = Array.isArray(product.store_product_variants) ? product.store_product_variants : [];
 
   return {
     id: product.id,
@@ -70,6 +109,14 @@ function normalizeStorefrontProduct(product) {
     sustainability: "Selected for long-term wear and responsible wardrobe building.",
     imageUrl: primaryImage?.image_url || "",
     secondaryImageUrl: secondaryImage?.image_url || primaryImage?.image_url || "",
+    variants: variants.map(variant => ({
+      id: variant.id,
+      color: variant.color,
+      size: variant.size,
+      stock: Number(variant.stock || 0),
+      sku: variant.sku || "",
+      imageUrl: variant.image_url || ""
+    })),
     color: "#6c706c",
     accent: "#d8c6ad"
   };
@@ -188,6 +235,8 @@ function hydrateProductDetailPage() {
   if (accordionCopy[0]) accordionCopy[0].textContent = product.care;
   if (accordionCopy[1]) accordionCopy[1].textContent = product.sustainability;
 
+  hydrateProductVariantSelectors(product);
+
   const addButton = document.getElementById("addToBagBtn");
   if (addButton) {
     addButton.dataset.productId = product.id;
@@ -195,6 +244,126 @@ function hydrateProductDetailPage() {
     addButton.dataset.productPrice = product.price;
     addButton.dataset.productImg = window.studioProductImage(product);
   }
+}
+
+function hydrateProductVariantSelectors(product) {
+  const variants = Array.isArray(product.variants) ? product.variants : [];
+  if (!variants.length) return;
+
+  const colorGroup = document.querySelector(".color-swatch-group");
+  const sizeGrid = document.querySelector(".size-buttons-grid");
+  const selectedColorText = document.querySelector(".selector-label .selected-value");
+  if (!colorGroup || !sizeGrid) return;
+
+  const colors = [...new Set(variants.map(variant => variant.color).filter(Boolean))];
+  const sizes = [...new Set(variants.map(variant => variant.size).filter(Boolean))];
+  const firstAvailable = variants.find(variant => variant.stock > 0) || variants[0];
+
+  colorGroup.innerHTML = colors.map(color => `
+    <button
+      class="swatch-btn ${color === firstAvailable.color ? "active" : ""}"
+      style="background-color: ${getVariantSwatchColor(color)};"
+      title="${escapeSiteText(color)}"
+      type="button"
+    ></button>
+  `).join("");
+
+  sizeGrid.innerHTML = sizes.map(size => {
+    const matchingVariant = variants.find(variant => variant.color === firstAvailable.color && variant.size === size);
+    const disabled = !matchingVariant || matchingVariant.stock <= 0;
+    return `<button class="size-box-btn ${size === firstAvailable.size ? "active" : ""} ${disabled ? "disabled" : ""}" type="button">${escapeSiteText(size)}</button>`;
+  }).join("");
+
+  if (selectedColorText) selectedColorText.textContent = firstAvailable.color || "";
+  updateSelectedVariantData(product);
+  bindVariantSelectorEvents(product);
+}
+
+function bindVariantSelectorEvents(product) {
+  document.querySelectorAll(".color-swatch-group .swatch-btn").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".color-swatch-group .swatch-btn").forEach(btn => btn.classList.remove("active"));
+      button.classList.add("active");
+
+      const selectedColorText = document.querySelector(".selector-label .selected-value");
+      if (selectedColorText) selectedColorText.textContent = button.getAttribute("title") || "";
+
+      updateSizeAvailabilityForColor(product);
+      updateSelectedVariantData(product);
+    });
+  });
+
+  document.querySelectorAll(".size-buttons-grid .size-box-btn").forEach(button => {
+    if (button.classList.contains("disabled")) return;
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".size-buttons-grid .size-box-btn").forEach(btn => btn.classList.remove("active"));
+      button.classList.add("active");
+      updateSelectedVariantData(product);
+    });
+  });
+}
+
+function updateSizeAvailabilityForColor(product) {
+  const variants = Array.isArray(product.variants) ? product.variants : [];
+  const selectedColor = document.querySelector(".color-swatch-group .swatch-btn.active")?.getAttribute("title") || "";
+  let activeSizeStillAvailable = false;
+
+  document.querySelectorAll(".size-buttons-grid .size-box-btn").forEach(button => {
+    const size = button.textContent.trim();
+    const variant = variants.find(item => item.color === selectedColor && item.size === size);
+    const disabled = !variant || variant.stock <= 0;
+    button.classList.toggle("disabled", disabled);
+    if (button.classList.contains("active") && !disabled) activeSizeStillAvailable = true;
+  });
+
+  if (!activeSizeStillAvailable) {
+    const firstAvailableButton = [...document.querySelectorAll(".size-buttons-grid .size-box-btn")]
+      .find(button => !button.classList.contains("disabled"));
+    document.querySelectorAll(".size-buttons-grid .size-box-btn").forEach(btn => btn.classList.remove("active"));
+    firstAvailableButton?.classList.add("active");
+  }
+}
+
+function updateSelectedVariantData(product) {
+  const addButton = document.getElementById("addToBagBtn");
+  if (!addButton) return;
+
+  const selectedColor = document.querySelector(".color-swatch-group .swatch-btn.active")?.getAttribute("title") || "";
+  const selectedSize = document.querySelector(".size-buttons-grid .size-box-btn.active")?.textContent.trim() || "";
+  const variant = product.variants?.find(item => item.color === selectedColor && item.size === selectedSize);
+
+  addButton.dataset.variantId = variant?.id || "";
+  addButton.dataset.variantStock = String(variant?.stock ?? "");
+  addButton.disabled = Boolean(variant && variant.stock <= 0);
+  addButton.textContent = variant && variant.stock <= 0 ? "Sold Out" : "Add To Shopping Bag";
+}
+
+function getVariantSwatchColor(color) {
+  const palette = {
+    "carbon grey": "#5A5D64",
+    "gray": "#6b7280",
+    "grey": "#6b7280",
+    "midnight black": "#1A1C1E",
+    "black": "#111827",
+    "oatmeal cream": "#E3DEC3",
+    "cream": "#E3DEC3",
+    "white": "#f8fafc",
+    "blue": "#2563eb",
+    "red": "#dc2626",
+    "green": "#16a34a"
+  };
+
+  return palette[String(color || "").trim().toLowerCase()] || "#9fb7bd";
+}
+
+function escapeSiteText(value) {
+  return String(value || "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  }[char]));
 }
 
 function initSearchShortcuts() {
@@ -217,9 +386,11 @@ function initInlineAddToBagButtons() {
 
     const product = window.studioFindProduct(button.dataset.productId || button.dataset.id);
     if (typeof addItemToCart === "function") {
+      const defaultVariant = product.variants?.find(variant => variant.stock > 0) || product.variants?.[0];
       const added = addItemToCart(product.id, product.title, product.price, window.studioProductImage(product), {
-        color: product.kicker || product.category || "Default",
-        size: "Standard"
+        variantId: defaultVariant?.id || "",
+        color: defaultVariant?.color || product.kicker || product.category || "Default",
+        size: defaultVariant?.size || "Standard"
       });
       if (!added) return;
 

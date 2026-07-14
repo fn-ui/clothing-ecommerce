@@ -71,7 +71,8 @@ function addItemToCart(id, title, price, img, options = {}) {
 
   const size = String(options.size || '').trim();
   const color = String(options.color || '').trim();
-  const variantKey = [id, size || 'one-size', color || 'default']
+  const variantId = String(options.variantId || options.variant_id || '').trim();
+  const variantKey = [id, variantId || size || 'one-size', color || 'default']
     .map(value => String(value).trim().toLowerCase().replace(/\s+/g, '-'))
     .join(':');
 
@@ -82,6 +83,7 @@ function addItemToCart(id, title, price, img, options = {}) {
   } else {
     cartItems.push({
       id: String(id),
+      variant_id: variantId,
       variantKey,
       title,
       price: numericalPrice,

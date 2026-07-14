@@ -154,6 +154,14 @@ const customerSessionReady = refreshCustomerSession();
 async function syncCustomerToAdmin(customer) {
   if (!window.publicSupabaseClient || !customer?.email) return;
 
+  const { data: existingProfile } = await window.publicSupabaseClient
+    .from("store_profiles")
+    .select("id,email,role")
+    .eq("email", customer.email)
+    .maybeSingle();
+
+  if (existingProfile?.role === "admin") return;
+
   const profilePayload = {
     id: customer.id,
     email: customer.email,
