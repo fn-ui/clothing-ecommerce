@@ -10,6 +10,7 @@ async function fetchPayments() {
     const { data, error } = await window.supabaseClient
         .from("store_checkout_intents")
         .select("customer_email,customer_name,payment_method,status,payment_status,payment_reference,total,items,created_at")
+        .eq("status", "paid")
         .order("created_at", { ascending: false });
 
     if (error) {
@@ -25,11 +26,11 @@ async function fetchPayments() {
 }
 
 function updatePaymentStats() {
-    const pending = paymentRows.filter(row => (row.status || "pending") === "pending").length;
+    const completed = paymentRows.filter(row => (row.status || "") === "paid").length;
     const totalValue = paymentRows.reduce((total, row) => total + Number(row.total || 0), 0);
 
-    setPaymentText("paymentLeadCount", paymentRows.length);
-    setPaymentText("pendingPaymentCount", pending);
+    setPaymentText("paymentLeadCount", completed);
+    setPaymentText("pendingPaymentCount", paymentRows.length);
     setPaymentText("paymentTotalValue", formatAdminCurrency(totalValue));
 }
 
@@ -40,7 +41,7 @@ function renderPayments() {
     if (!filteredPaymentRows.length) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" class="empty">No checkout leads captured yet.</td>
+                <td colspan="6" class="empty">No completed payments yet.</td>
             </tr>
         `;
         return;
