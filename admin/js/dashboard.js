@@ -66,7 +66,7 @@ async function loadStats() {
 
     const newsletter = await countTableRows("store_newsletter");
 
-    const checkoutIntents = await countTableRows("store_checkout_intents");
+    const checkoutIntents = await countUniqueCheckoutLeads();
 
     document.getElementById("productCount").textContent = products || 0;
     document.getElementById("categoryCount").textContent = categories || 0;
@@ -128,6 +128,26 @@ async function countCapturedCustomers() {
     const seen = new Set();
     return rows.filter(customer => {
         const key = customer.email || `${customer.name}-${customer.created_at}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    }).length;
+}
+
+async function countUniqueCheckoutLeads() {
+    const { data, error } = await window.supabaseClient
+        .from("store_checkout_intents")
+        .select("customer_email,customer_name,created_at")
+        .not("customer_email", "is", null);
+
+    if (error) {
+        console.warn("Checkout lead count unavailable:", error.message);
+        return 0;
+    }
+
+    const seen = new Set();
+    return (data || []).filter(customer => {
+        const key = customer.customer_email || `${customer.customer_name}-${customer.created_at}`;
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
