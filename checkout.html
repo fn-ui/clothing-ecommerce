@@ -81,7 +81,7 @@
           </div>
 
           <div class="payment-panel" data-payment-panel="paypal">
-            <p class="payment-panel-note">You will be redirected to PayPal after order review when PayPal is connected.</p>
+            <p class="payment-panel-note">You will be redirected to PayPal to complete payment securely.</p>
             <div class="input-row">
               <input type="email" id="paypalEmail" placeholder="PayPal email address" autocomplete="email" disabled>
             </div>
@@ -137,18 +137,24 @@
   <!-- Checkout Computation Management Script -->
   <script>
   document.addEventListener('DOMContentLoaded', () => {
+    const initializeCheckout = async () => {
+      try {
+        await window.STUDIO_CUSTOMER?.ready;
+      } catch (error) {
+        console.warn('Customer session warning:', error.message);
+      }
 
-    const subtotalElement =
-      document.getElementById('summarySubtotal');
+      const subtotalElement =
+        document.getElementById('summarySubtotal');
 
-    const totalElement =
-      document.getElementById('summaryTotal');
+      const totalElement =
+        document.getElementById('summaryTotal');
 
-    const checkoutForm =
-      document.getElementById('checkoutForm');
+      const checkoutForm =
+        document.getElementById('checkoutForm');
 
-    const toast =
-      document.getElementById('toastNotification');
+      const toast =
+        document.getElementById('toastNotification');
 
     // ===============================
     // CALCULATE TOTALS
@@ -192,6 +198,30 @@
       paystack: 'Paystack'
     };
 
+    async function readPaymentResponse(response, providerName) {
+      const responseText = await response.text();
+
+      if (!responseText) {
+        if (response.status === 405) {
+          return {
+            error: `${providerName} API endpoint rejected POST requests. Run the site with the project server or deploy it to Vercel so /api functions are active.`
+          };
+        }
+
+        return {
+          error: `${providerName} returned an empty response. HTTP ${response.status || 'unknown'} ${response.statusText || ''}`.trim()
+        };
+      }
+
+      try {
+        return JSON.parse(responseText);
+      } catch (error) {
+        return {
+          error: `${providerName} returned an unreadable response. HTTP ${response.status || 'unknown'} ${response.statusText || ''}`.trim()
+        };
+      }
+    }
+
     function setPaymentMethod(method) {
       document.querySelectorAll('.payment-method-option').forEach(option => {
         option.classList.toggle(
@@ -233,6 +263,8 @@
       const selectedMethod =
         document.querySelector('input[name="paymentMethod"]:checked')?.value || 'mpesa';
       const selectedLabel = methodLabels[selectedMethod];
+      const mpesaPhone =
+        document.getElementById('mpesaPhone')?.value.trim() || '';
 
       const customer =
         window.STUDIO_CUSTOMER?.getCurrentCustomer?.() || null;
@@ -250,7 +282,7 @@
         payment_status: 'pending',
         subtotal: runningSubtotal,
         total: runningSubtotal,
-        currency: 'KES',
+        currency: selectedMethod === 'paypal' ? 'USD' : 'KES',
         items: cartItems,
         shipping_address: {
           line1: document.getElementById('checkoutAddress')?.value.trim(),
@@ -316,7 +348,7 @@
             })
           });
 
-          const paymentResult = await paymentResponse.json();
+          const paymentResult = await readPaymentResponse(paymentResponse, 'Paystack');
 
           if (!paymentResponse.ok) {
             throw new Error(paymentResult.error || 'Paystack initialization failed.');
@@ -330,7 +362,76 @@
         }
       }
 
-      if (checkoutCaptured && selectedMethod !== 'paystack') {
+      if (checkoutCaptured && selectedMethod === 'mpesa') {
+        try {
+          toast.textContent = 'Sending M-Pesa prompt...';
+
+          const paymentResponse = await fetch('/api/mpesa-stk-push', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              checkoutId: checkoutIntent.id,
+              phone: mpesaPhone,
+              email: checkoutIntent.customer_email,
+              customerName: checkoutIntent.customer_name,
+              amount: checkoutIntent.total,
+              currency: checkoutIntent.currency
+            })
+          });
+
+          const paymentResult = await readPaymentResponse(paymentResponse, 'M-Pesa');
+
+          if (!paymentResponse.ok) {
+            throw new Error(paymentResult.error || 'M-Pesa STK Push failed.');
+          }
+
+          toast.textContent = paymentResult.message || 'M-Pesa prompt sent. Complete payment on your phone.';
+          return;
+        } catch (error) {
+          console.error('M-Pesa STK Push failed:', error);
+          toast.textContent = `M-Pesa setup failed: ${error.message}`;
+        }
+      }
+
+      if (checkoutCaptured && selectedMethod === 'paypal') {
+        try {
+          toast.textContent = 'Redirecting to PayPal...';
+
+          const paymentResponse = await fetch('/api/paypal-create-order', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              checkoutId: checkoutIntent.id,
+              email: checkoutIntent.customer_email,
+              customerName: checkoutIntent.customer_name,
+              amount: checkoutIntent.total,
+              currency: checkoutIntent.currency
+            })
+          });
+
+          const paymentResult = await readPaymentResponse(paymentResponse, 'PayPal');
+
+          if (!paymentResponse.ok) {
+            throw new Error(paymentResult.error || 'PayPal initialization failed.');
+          }
+
+          if (!paymentResult.approval_url) {
+            throw new Error(paymentResult.error || 'PayPal did not return a checkout link.');
+          }
+
+          window.location.href = paymentResult.approval_url;
+          return;
+        } catch (error) {
+          console.error('PayPal initialization failed:', error);
+          toast.textContent = `PayPal setup failed: ${error.message}`;
+        }
+      }
+
+      if (checkoutCaptured && !['mpesa', 'paystack', 'paypal'].includes(selectedMethod)) {
         toast.textContent =
           `${selectedLabel} selected. Order captured in admin. Gateway integration is not connected yet.`;
       }
@@ -340,6 +441,11 @@
         toast.classList.remove('show');
 
       }, 2200);
+    });
+    };
+
+    initializeCheckout().catch(error => {
+      console.warn('Checkout initialization warning:', error.message);
     });
   });
 </script>

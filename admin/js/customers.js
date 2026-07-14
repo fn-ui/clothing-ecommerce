@@ -27,7 +27,7 @@ async function fetchCustomers() {
 async function fetchCustomerProfiles() {
     const { data, error } = await window.supabaseClient
         .from("store_profiles")
-        .select("email,full_name,phone,address,created_at")
+        .select("email,full_name,created_at")
         .eq("role", "customer")
         .order("created_at", { ascending: false });
 
@@ -39,10 +39,10 @@ async function fetchCustomerProfiles() {
     return (data || []).map(profile => ({
         name: profile.full_name || "-",
         email: profile.email || "-",
-        phone: profile.phone || "-",
+        phone: "-",
         source: "Profile",
         created_at: profile.created_at,
-        address: profile.address
+        address: null
     }));
 }
 

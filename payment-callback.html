@@ -22,7 +22,7 @@
     <section class="checkout-form-section" style="background: transparent; padding: 0;">
       <div class="panel-header-block">
         <h2 id="paymentStatusTitle">Verifying payment</h2>
-        <p id="paymentStatusMessage">Please wait while we confirm your Paystack payment.</p>
+        <p id="paymentStatusMessage">Please wait while we confirm your payment.</p>
       </div>
 
       <div class="payment-status-actions">
@@ -38,11 +38,14 @@
       const title = document.getElementById("paymentStatusTitle");
       const message = document.getElementById("paymentStatusMessage");
       const action = document.getElementById("paymentPrimaryAction");
-      const reference = new URLSearchParams(window.location.search).get("reference");
+      const params = new URLSearchParams(window.location.search);
+      const reference = params.get("reference");
+      const paypalOrderId = params.get("token");
+      const checkoutId = params.get("checkout_id");
 
-      if (!reference) {
+      if (!reference && !paypalOrderId) {
         title.textContent = "Payment reference missing";
-        message.textContent = "We could not find a Paystack reference for this payment.";
+        message.textContent = "We could not find a payment reference for this order.";
         action.disabled = false;
         action.textContent = "Return To Checkout";
         action.onclick = () => window.location.href = "checkout.html";
@@ -50,12 +53,12 @@
       }
 
       try {
-        const response = await fetch("/api/paystack/verify", {
+        const response = await fetch(paypalOrderId ? "/api/paypal-capture-order" : "/api/paystack/verify", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ reference })
+          body: JSON.stringify(paypalOrderId ? { orderId: paypalOrderId, checkoutId } : { reference })
         });
 
         const result = await response.json();
@@ -75,7 +78,7 @@
         }
 
         title.textContent = "Payment not completed";
-        message.textContent = result.message || "Paystack did not mark this payment as successful.";
+        message.textContent = result.message || "The payment provider did not mark this payment as successful.";
         action.textContent = "Return To Checkout";
         action.disabled = false;
         action.onclick = () => window.location.href = "checkout.html";

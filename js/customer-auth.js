@@ -1,24 +1,9 @@
 const STUDIO_CUSTOMER_KEY = "studioFitCustomer";
-const STUDIO_CUSTOMER_DIRECTORY_KEY = "studioFitCustomers";
-
-function readCustomerDirectory() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(STUDIO_CUSTOMER_DIRECTORY_KEY)) || {};
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch (error) {
-    localStorage.removeItem(STUDIO_CUSTOMER_DIRECTORY_KEY);
-    return {};
-  }
-}
-
-function saveCustomerDirectory(directory) {
-  localStorage.setItem(STUDIO_CUSTOMER_DIRECTORY_KEY, JSON.stringify(directory));
-}
 
 function getCurrentCustomer() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STUDIO_CUSTOMER_KEY));
-    return parsed && parsed.email ? parsed : null;
+    return parsed?.email && parsed?.authProvider === "supabase" ? normalizeCustomer(parsed) : null;
   } catch (error) {
     localStorage.removeItem(STUDIO_CUSTOMER_KEY);
     return null;
@@ -28,10 +13,6 @@ function getCurrentCustomer() {
 function setCurrentCustomer(customer) {
   const cleanCustomer = normalizeCustomer(customer);
   localStorage.setItem(STUDIO_CUSTOMER_KEY, JSON.stringify(cleanCustomer));
-
-  const directory = readCustomerDirectory();
-  directory[cleanCustomer.email] = cleanCustomer;
-  saveCustomerDirectory(directory);
 
   if (typeof syncCartUI === "function") syncCartUI();
 
@@ -61,7 +42,8 @@ function normalizeCustomer(customer) {
     email,
     phone: customer.phone || "",
     memberSince: customer.memberSince || new Date().getFullYear(),
-    address: customer.address || null
+    address: customer.address || null,
+    authProvider: "supabase"
   };
 }
 
@@ -75,11 +57,6 @@ function createCustomerId() {
   return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, char =>
     (Number(char) ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> Number(char) / 4).toString(16)
   );
-}
-
-function findCustomerByEmail(email) {
-  const normalizedEmail = String(email || "").trim().toLowerCase();
-  return readCustomerDirectory()[normalizedEmail] || null;
 }
 
 function customerInitials(customer) {
@@ -99,6 +76,81 @@ function showCustomerMessage(element, message, isError = false) {
   element.classList.toggle("form-message-success", !isError);
 }
 
+function hasSupabaseAuth() {
+  return Boolean(window.publicSupabaseClient?.auth);
+}
+
+function customerFromSupabaseUser(user, profile = null, fallback = {}) {
+  const metadata = user?.user_metadata || {};
+  const email = String(user?.email || profile?.email || fallback.email || "").trim().toLowerCase();
+  const firstName = profile?.first_name || metadata.first_name || fallback.firstName || "";
+  const lastName = profile?.last_name || metadata.last_name || fallback.lastName || "";
+  const fullName = profile?.full_name || metadata.full_name || `${firstName} ${lastName}`.trim() || email.split("@")[0];
+
+  return normalizeCustomer({
+    id: user?.id || profile?.id || fallback.id,
+    firstName,
+    lastName,
+    fullName,
+    email,
+    phone: profile?.phone || metadata.phone || fallback.phone || "",
+    address: profile?.address || fallback.address || null,
+    memberSince: user?.created_at ? new Date(user.created_at).getFullYear() : fallback.memberSince
+  });
+}
+
+async function fetchCustomerProfile(user) {
+  if (!window.publicSupabaseClient || !user?.id) return null;
+
+  const byId = await window.publicSupabaseClient
+    .from("store_profiles")
+    .select("id,email,full_name,created_at")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!byId.error && byId.data) return byId.data;
+
+  if (!user.email) return null;
+
+  const byEmail = await window.publicSupabaseClient
+    .from("store_profiles")
+    .select("id,email,full_name,created_at")
+    .eq("email", user.email)
+    .maybeSingle();
+
+  if (byEmail.error) {
+    console.warn("Customer profile unavailable:", byEmail.error.message);
+    return null;
+  }
+
+  return byEmail.data || null;
+}
+
+async function cacheSupabaseCustomer(user, fallback = {}) {
+  const profile = await fetchCustomerProfile(user);
+  const customer = setCurrentCustomer(customerFromSupabaseUser(user, profile, fallback));
+  await syncCustomerToAdmin(customer);
+  return customer;
+}
+
+async function refreshCustomerSession() {
+  if (!hasSupabaseAuth()) {
+    clearCurrentCustomer();
+    return null;
+  }
+
+  const { data, error } = await window.publicSupabaseClient.auth.getSession();
+
+  if (error || !data?.session?.user) {
+    clearCurrentCustomer();
+    return null;
+  }
+
+  return cacheSupabaseCustomer(data.session.user, getCurrentCustomer() || {});
+}
+
+const customerSessionReady = refreshCustomerSession();
+
 async function syncCustomerToAdmin(customer) {
   if (!window.publicSupabaseClient || !customer?.email) return;
 
@@ -106,6 +158,8 @@ async function syncCustomerToAdmin(customer) {
     id: customer.id,
     email: customer.email,
     full_name: customer.fullName,
+    first_name: customer.firstName,
+    last_name: customer.lastName,
     role: "customer",
     phone: customer.phone || null,
     address: customer.address || null
@@ -153,13 +207,41 @@ function initCustomerLogin() {
   form.addEventListener("submit", async event => {
     event.preventDefault();
 
-    const email = form.querySelector("#loginEmail")?.value;
-    const existingCustomer = findCustomerByEmail(email);
-    const customer = setCurrentCustomer(existingCustomer || { email });
+    if (!hasSupabaseAuth()) {
+      showCustomerMessage(message, "Account sign-in is not connected yet. Please check Supabase settings.", true);
+      return;
+    }
 
-    await syncCustomerToAdmin(customer);
-    showCustomerMessage(message, `Signed in as ${customer.fullName}.`);
-    window.location.href = getAuthRedirectDestination();
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton?.textContent || "Sign In";
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Signing In...";
+    }
+
+    const email = form.querySelector("#loginEmail")?.value.trim().toLowerCase();
+    const password = form.querySelector("#loginPassword")?.value;
+
+    try {
+      const { data, error } = await window.publicSupabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      const customer = await cacheSupabaseCustomer(data.user);
+      showCustomerMessage(message, `Signed in as ${customer.fullName}.`);
+      window.location.href = getAuthRedirectDestination();
+    } catch (error) {
+      clearCurrentCustomer();
+      showCustomerMessage(message, error.message || "The email or password is incorrect.", true);
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
+    }
   });
 }
 
@@ -172,15 +254,68 @@ function initCustomerRegister() {
   form.addEventListener("submit", async event => {
     event.preventDefault();
 
-    const customer = setCurrentCustomer({
-      firstName: form.querySelector("#registerFirstName")?.value,
-      lastName: form.querySelector("#registerLastName")?.value,
-      email: form.querySelector("#registerEmail")?.value
-    });
+    if (!hasSupabaseAuth()) {
+      showCustomerMessage(message, "Account registration is not connected yet. Please check Supabase settings.", true);
+      return;
+    }
 
-    await syncCustomerToAdmin(customer);
-    showCustomerMessage(message, `Account created for ${customer.fullName}.`);
-    window.location.href = getAuthRedirectDestination();
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton?.textContent || "Create Account";
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Creating...";
+    }
+
+    const firstName = form.querySelector("#registerFirstName")?.value.trim();
+    const lastName = form.querySelector("#registerLastName")?.value.trim();
+    const email = form.querySelector("#registerEmail")?.value.trim().toLowerCase();
+    const password = form.querySelector("#registerPassword")?.value;
+
+    if (String(password || "").length < 8) {
+      showCustomerMessage(message, "Password must be at least 8 characters.", true);
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
+      return;
+    }
+
+    try {
+      const fullName = `${firstName || ""} ${lastName || ""}`.trim();
+      const { data, error } = await window.publicSupabaseClient.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            full_name: fullName
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      const fallback = { firstName, lastName, fullName, email };
+
+      if (!data.session) {
+        clearCurrentCustomer();
+        showCustomerMessage(message, "Account created. Please check your email to confirm your account before signing in.");
+        return;
+      }
+
+      const customer = await cacheSupabaseCustomer(data.user, fallback);
+      showCustomerMessage(message, `Account created for ${customer.fullName}.`);
+      window.location.href = getAuthRedirectDestination();
+    } catch (error) {
+      clearCurrentCustomer();
+      showCustomerMessage(message, error.message || "Account creation failed.", true);
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
+    }
   });
 }
 
@@ -193,10 +328,10 @@ function getAuthRedirectDestination() {
   return redirect;
 }
 
-function initCustomerAccount() {
+async function initCustomerAccount() {
   if (!document.querySelector(".account-portal-container")) return;
 
-  const customer = getCurrentCustomer();
+  const customer = await refreshCustomerSession();
   if (!customer) {
     window.location.href = "login.html";
     return;
@@ -399,12 +534,41 @@ function initProfileUpdates(customer) {
 
   form.addEventListener("submit", async event => {
     event.preventDefault();
+    const currentCustomer = getCurrentCustomer() || customer;
+    const firstName = form.querySelector("#profileFirstName")?.value.trim();
+    const lastName = form.querySelector("#profileLastName")?.value.trim();
+    const email = form.querySelector("#profileEmail")?.value.trim().toLowerCase();
+    const phone = form.querySelector("#profilePhone")?.value.trim();
+    const fullName = `${firstName || ""} ${lastName || ""}`.trim();
+
+    if (hasSupabaseAuth()) {
+      const updatePayload = {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          full_name: fullName,
+          phone
+        }
+      };
+
+      if (email && email !== currentCustomer.email) {
+        updatePayload.email = email;
+      }
+
+      const { error } = await window.publicSupabaseClient.auth.updateUser(updatePayload);
+      if (error) {
+        showCustomerToast(error.message || "Profile update failed.");
+        return;
+      }
+    }
+
     const updatedCustomer = setCurrentCustomer({
-      ...getCurrentCustomer(),
-      firstName: form.querySelector("#profileFirstName")?.value,
-      lastName: form.querySelector("#profileLastName")?.value,
-      email: form.querySelector("#profileEmail")?.value,
-      phone: form.querySelector("#profilePhone")?.value
+      ...currentCustomer,
+      firstName,
+      lastName,
+      fullName,
+      email,
+      phone
     });
     await syncCustomerToAdmin(updatedCustomer);
     hydrateAccountHeader(updatedCustomer);
@@ -440,7 +604,11 @@ function initCustomerSignOut() {
   const button = document.getElementById("customerSignOutBtn");
   if (!button) return;
 
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
+    if (hasSupabaseAuth()) {
+      await window.publicSupabaseClient.auth.signOut();
+    }
+
     clearCurrentCustomer();
     window.location.href = "index.html";
   });
@@ -488,10 +656,11 @@ function setValue(selector, value) {
   if (element) element.value = value || "";
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await customerSessionReady;
   initCustomerLogin();
   initCustomerRegister();
-  initCustomerAccount();
+  await initCustomerAccount();
 });
 
 window.STUDIO_CUSTOMER = {
@@ -499,5 +668,19 @@ window.STUDIO_CUSTOMER = {
   setCurrentCustomer,
   syncCustomerToAdmin,
   clearCurrentCustomer,
-  customerInitials
+  customerInitials,
+  ready: customerSessionReady
 };
+
+if (hasSupabaseAuth()) {
+  window.publicSupabaseClient.auth.onAuthStateChange(async (event, session) => {
+    if (session?.user) {
+      await cacheSupabaseCustomer(session.user, getCurrentCustomer() || {});
+      return;
+    }
+
+    if (event === "SIGNED_OUT") {
+      clearCurrentCustomer();
+    }
+  });
+}
