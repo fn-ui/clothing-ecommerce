@@ -17,6 +17,7 @@ const apiRoutes = {
   "/api/mpesa/stk-push": "./api/mpesa/stk-push",
   "/api/mpesa/callback": "./api/mpesa/callback",
   "/api/mpesa/query": "./api/mpesa/query",
+  "/api/image-proxy": "./api/image-proxy",
   "/api/paystack/initialize": "./api/paystack/initialize",
   "/api/paystack/verify": "./api/paystack/verify"
 };
@@ -55,6 +56,7 @@ async function handleApiRequest(handlerPath, request, response) {
   const apiRequest = {
     method: request.method,
     headers: request.headers,
+    url: request.url,
     body: parseJsonBody(bodyText)
   };
 
@@ -70,6 +72,11 @@ async function handleApiRequest(handlerPath, request, response) {
     },
     json(payload) {
       sendJson(response, this.statusCode, payload, this.headers);
+      return this;
+    },
+    send(payload) {
+      response.writeHead(this.statusCode, this.headers);
+      response.end(payload);
       return this;
     }
   };

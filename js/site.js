@@ -225,11 +225,13 @@ function hydrateProductDetailPage() {
 
   const galleryImages = document.querySelectorAll(".product-gallery img");
   if (galleryImages[0]) {
-    galleryImages[0].src = window.studioProductImage(product);
+    galleryImages[0].crossOrigin = "anonymous";
+    galleryImages[0].src = getCanvasReadableImageUrl(window.studioProductImage(product));
     galleryImages[0].alt = `${product.title} front view`;
   }
   if (galleryImages[1]) {
-    galleryImages[1].src = window.studioProductImage(product, 1);
+    galleryImages[1].crossOrigin = "anonymous";
+    galleryImages[1].src = getCanvasReadableImageUrl(window.studioProductImage(product, 1));
     galleryImages[1].alt = `${product.title} detail view`;
   }
 
@@ -392,6 +394,18 @@ function getTintedProductImage(product) {
   return window.studioProductImage(product);
 }
 
+function getCanvasReadableImageUrl(imageUrl) {
+  if (!imageUrl || imageUrl.startsWith("data:") || imageUrl.startsWith("blob:")) return imageUrl;
+
+  try {
+    const parsedUrl = new URL(imageUrl, window.location.href);
+    if (parsedUrl.origin === window.location.origin) return parsedUrl.href;
+    return `/api/image-proxy?url=${encodeURIComponent(parsedUrl.href)}`;
+  } catch (error) {
+    return imageUrl;
+  }
+}
+
 function normalizeHexColor(value) {
   const color = String(value || "").trim();
   return /^#(?:[0-9a-f]{3}){1,2}$/i.test(color) ? color : "";
@@ -449,11 +463,27 @@ function recolorGarmentPixels(image, canvas, colorHex) {
     }
 
     canvas.getContext("2d").putImageData(imageData, 0, 0);
+    image.classList.add("has-product-recolor");
+    image.style.filter = "";
     canvas.style.opacity = "1";
   } catch (error) {
     console.warn("Product color recolor unavailable:", error.message);
+    image.classList.remove("has-product-recolor");
+    image.style.filter = getProductFallbackFilter(colorHex);
     canvas.style.opacity = "0";
   }
+}
+
+function getProductFallbackFilter(colorHex) {
+  const target = hexToHsl(colorHex);
+  if (!target) return "";
+
+  const baseGarmentHue = 205;
+  const hueRotate = target.h - baseGarmentHue;
+  const saturation = target.s < 12 ? 0.45 : 1.6 + (target.s / 55);
+  const brightness = 0.94 + ((target.l - 50) / 320);
+
+  return `saturate(${saturation.toFixed(2)}) hue-rotate(${hueRotate.toFixed(0)}deg) brightness(${brightness.toFixed(2)}) contrast(1.03)`;
 }
 
 function isLikelyGarmentPixel(red, green, blue, alpha) {

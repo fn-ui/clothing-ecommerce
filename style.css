@@ -794,6 +794,10 @@
   transition: transform .5s ease;
 }
 
+.gallery-image-frame img.has-product-recolor {
+  opacity: 0;
+}
+
 .gallery-image-frame:hover img {
   transform: scale(1.03);
 }
